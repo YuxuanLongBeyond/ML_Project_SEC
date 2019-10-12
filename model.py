@@ -18,6 +18,8 @@ class LinkNet(nn.Module):
         super(LinkNet, self).__init__()
         
         resnet = models.resnet34(pretrained = True)
+        for param in resnet.parameters():
+            param.requires_grad = False
         
         layer0 = [resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool]
         self.layer0 = nn.Sequential(*layer0)
@@ -31,9 +33,12 @@ class LinkNet(nn.Module):
         self.decoder3 = Decoder(128, 64)
         self.decoder4 = Decoder(64, 64)
         
+#        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
+#                    nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), nn.ReLU(), 
+#                    nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
         decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
-                    nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), nn.ReLU(), 
-                    nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
+                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), 
+                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
         self.decoder5 = nn.Sequential(*decoder5)
         
         
@@ -51,7 +56,7 @@ class LinkNet(nn.Module):
         d4 = self.decoder4(d3)
         out = self.decoder5(d4)
 
-        return nn.functional.sigmoid(out)
+        return torch.sigmoid(out)
     
 class Decoder(nn.Module):
     def __init__(self, c_in, c_out):
@@ -71,3 +76,39 @@ class Decoder(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         return x        
+    
+class Loss(nn.Module):
+    def __init__(self, smooth, lam, beta):
+        super(Loss, self).__init__()
+
+        self.smooth = smooth
+        self.lam = lam
+        self.beta = beta        
+    
+    def bce_loss(self, pred, mask):
+        bce = - self.beta * mask * torch.log(pred) - (1 - self.beta) * (1 - mask) * torch.log(1 - pred)
+        return torch.mean(bce)
+
+    def dice_loss(self, pred, mask):
+        
+        numer = 2.0 * torch.sum(pred * mask, (1, 2, 3))
+        denom = torch.sum(pred, (1, 2, 3)) + torch.sum(mask, (1, 2, 3))
+        loss_batch = 1 - (numer + self.smooth) / (denom + self.smooth)
+        return torch.mean(loss_batch)
+        
+    def final_loss(self, pred, mask):
+        bce_loss = self.bce_loss(pred, mask)
+        
+        dl_loss = self.dice_loss(pred, mask)
+        
+        return bce_loss + dl_loss * self.lam
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
