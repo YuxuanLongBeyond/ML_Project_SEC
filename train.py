@@ -10,6 +10,7 @@ Created on Thu Sep 26 20:07:35 2019
 
 
 import os
+import shutil
 # import argparse
 import random
 import numpy as np
@@ -119,6 +120,9 @@ def create_models():
     
 
 if __name__ == '__main__':
+    if os.path.exists('./epoch_output'):
+        shutil.rmtree('./epoch_output')
+    os.makedirs('./epoch_output')
     net = create_models()
     image_size = 384
     batch_size = 20
@@ -132,7 +136,7 @@ if __name__ == '__main__':
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
-    beta = 0.7
+    beta = 0.5
     
     ##create single image tensor for test in each epoch
     test_image_origin = io.imread(test_image_name)
@@ -205,12 +209,10 @@ if __name__ == '__main__':
         dummy[:, :, 0] = channel
             
         dummy = (dummy * 255).astype(np.uint8)
-        io.imsave('./epoch_output/test_output_iter' + str(iteration) + '.png', dummy, quality = 100)
+        io.imsave('./epoch_output/test_output_iter' + str(iteration) + '.png', dummy)
                     
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average loss is ', epoch_loss)
-        
-        
         
         
         
