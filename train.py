@@ -38,6 +38,11 @@ if __name__ == '__main__':
     if os.path.exists('./epoch_output'):
         shutil.rmtree('./epoch_output')
     os.makedirs('./epoch_output')
+    
+    if not os.path.exists('./parameters'):
+        os.makedirs('./parameters')
+        
+    
     net = utils.create_models()
     image_size = 384
     batch_size = 1
