@@ -20,13 +20,14 @@ import torch
 import torch.optim as optim
 
 import utils
+import random
 
 
 # Run on GPU if CUDA is available.
 RUN_ON_GPU = torch.cuda.is_available()
 
-SEED = 0
-
+SEED = 2019
+random.seed(SEED)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
 if RUN_ON_GPU:
@@ -34,22 +35,15 @@ if RUN_ON_GPU:
 
 
 if __name__ == '__main__':
-    root = './data/main_data/training'
-    if os.path.exists('./epoch_output'):
-        shutil.rmtree('./epoch_output')
-    os.makedirs('./epoch_output')
-    
-    if not os.path.exists('./parameters'):
-        os.makedirs('./parameters')
-        
-    
-    net = utils.create_models()
+    new_data = True
+    data_augment = True
+
     image_size = 384
     batch_size = 1
     num_epochs = 1
     save_interval = 1
 
-    test_image_name = root + '/images/satImage_001.png'
+    test_image_name = './data/main_data/training/images/satImage_001.png'
     resize = True
     
     lr = 2e-4
@@ -58,21 +52,35 @@ if __name__ == '__main__':
     lam = 1.0
     beta = 0.5
     
-    ##create single image tensor for test in each epoch
-    test_image_origin = io.imread(test_image_name)
-    test_image_origin = utils.image_transform(test_image_origin, resize, image_size)
-    test_image_dum = np.moveaxis(test_image_origin, 0, 2)
-    test_image = np.expand_dims(test_image_origin, axis = 0)
-    test_image = utils.np_to_var(torch.from_numpy(test_image))    
+    
+    if new_data:
+        root = './data/chicago'
+    else:
+        root = './data/main_data/training'
+     
+    root = './data/chicago'
+    if os.path.exists('./epoch_output'):
+        shutil.rmtree('./epoch_output')
+    os.makedirs('./epoch_output')
+    
+    if not os.path.exists('./parameters'):
+        os.makedirs('./parameters')    
+    
+#    ##create single image tensor for test in each epoch
+#    test_image_origin = io.imread(test_image_name)
+#    test_image_origin = utils.image_transform(test_image_origin, resize, image_size)
+#    test_image_dum = np.moveaxis(test_image_origin, 0, 2)
+#    test_image = np.expand_dims(test_image_origin, axis = 0)
+#    test_image = utils.np_to_var(torch.from_numpy(test_image))    
     
     
-    
+    net = utils.create_models()
     # create optimizers
     optimizer = optim.Adam(net.parameters(), lr = lr, weight_decay = weight_decay, amsgrad = True)
     Loss = utils.loss(smooth, lam, beta)
 
 
-    dataloader = utils.get_data_loader(root, resize, image_size = image_size, batch_size = batch_size)
+    dataloader = utils.get_data_loader(root, new_data, resize, data_augment, image_size, batch_size)
     num_batch = len(dataloader)
     total_train_iters = num_epochs * num_batch
 
@@ -106,20 +114,20 @@ if __name__ == '__main__':
             # keep track of loss for plotting and saving
 
             
-        ###dummy test
-        pred_test = net.forward(test_image)
-        pred_np = utils.var_to_np(pred_test)[0][0]
-        
-        new_mask = pred_np >= 0.5
-        
-        dummy = test_image_dum + 0
-        
-        channel = dummy[:, :, 0]
-        channel[new_mask] = 1.0
-        dummy[:, :, 0] = channel
-            
-        dummy = (dummy * 255).astype(np.uint8)
-        io.imsave('./epoch_output/test_output_iter' + str(iteration) + '.png', dummy)
+#        ###dummy test
+#        pred_test = net.forward(test_image)
+#        pred_np = utils.var_to_np(pred_test)[0][0]
+#        
+#        new_mask = pred_np >= 0.5
+#        
+#        dummy = test_image_dum + 0
+#        
+#        channel = dummy[:, :, 0]
+#        channel[new_mask] = 1.0
+#        dummy[:, :, 0] = channel
+#            
+#        dummy = (dummy * 255).astype(np.uint8)
+#        io.imsave('./epoch_output/test_output_iter' + str(iteration) + '.png', dummy)
                     
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average loss is ', epoch_loss)
