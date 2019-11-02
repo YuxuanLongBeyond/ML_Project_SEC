@@ -106,7 +106,28 @@ def crop_both(image, mask, low_size = 1100, high_size = 2560, sq_prob = 0.4):
             image = image[(w - crop_size):, 0:crop_size, :]
             mask = mask[(w - crop_size):, 0:crop_size]
     return image, mask
+       
+class TestDataset(utils_data.Dataset):
+    def __init__(self, root):
+        self.root = root
         
+        self.file_list = [f for f in os.listdir(root) if os.path.isfile(os.path.join(root, f))]
+#        random.shuffle(self.mask_file_list)
+        
+
+    def __getitem__(self, index):
+        img_name = os.path.join(self.root, self.file_list[index])
+        
+        image = io.imread(img_name)
+        image = np.array(image).astype(np.float32) / 255.0
+        image = image_resize(image, False, 0)
+        
+        sample = {'image': image}
+
+        return sample
+  
+    def __len__(self):
+        return len(self.file_list) 
 
 class MyDataset(utils_data.Dataset):
     def __init__(self, root, resize, data_augment, size):
@@ -116,7 +137,7 @@ class MyDataset(utils_data.Dataset):
         mask_dir = root + '/groundtruth'
         self.resize = resize
         self.mask_file_list = [f for f in os.listdir(mask_dir) if os.path.isfile(os.path.join(mask_dir, f))]
-        random.shuffle(self.mask_file_list)
+#        random.shuffle(self.mask_file_list)
 
     def __getitem__(self, index):
         file_name =  self.mask_file_list[index].rsplit('.', 1)[0]
@@ -163,7 +184,7 @@ class MyNewDataset(utils_data.Dataset):
         self.file_num = file_num
         file_list = [[image_file_list[i], label_file_list[i]] for i in range(file_num)]
         self.file_list = file_list
-        random.shuffle(self.file_list)
+#        random.shuffle(self.file_list)
 
     def __getitem__(self, index):
         img_name = self.root + '/' + self.file_list[index][0]

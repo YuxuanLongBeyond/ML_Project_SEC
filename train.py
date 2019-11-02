@@ -12,15 +12,17 @@ Created on Thu Sep 26 20:07:35 2019
 import os
 import shutil
 # import argparse
-from skimage import io
 import numpy as np
+import random
 import time
-
+from skimage import io
 import torch
 import torch.optim as optim
 
 import utils
-import random
+import test
+
+
 
 
 # Run on GPU if CUDA is available.
@@ -58,20 +60,12 @@ if __name__ == '__main__':
     else:
         root = './data/main_data/training'
      
-    root = './data/chicago'
     if os.path.exists('./epoch_output'):
         shutil.rmtree('./epoch_output')
     os.makedirs('./epoch_output')
     
     if not os.path.exists('./parameters'):
         os.makedirs('./parameters')    
-    
-#    ##create single image tensor for test in each epoch
-#    test_image_origin = io.imread(test_image_name)
-#    test_image_origin = utils.image_transform(test_image_origin, resize, image_size)
-#    test_image_dum = np.moveaxis(test_image_origin, 0, 2)
-#    test_image = np.expand_dims(test_image_origin, axis = 0)
-#    test_image = utils.np_to_var(torch.from_numpy(test_image))    
     
     
     net = utils.create_models()
@@ -94,7 +88,7 @@ if __name__ == '__main__':
             print('Iteration: ', iteration)
             image = utils.np_to_var(batch['image'])
             mask = utils.np_to_var(batch['mask'])
-#
+
             optimizer.zero_grad()
 
             pred = net.forward(image)
@@ -112,23 +106,11 @@ if __name__ == '__main__':
                 iteration, total_train_iters, loss.data.item()))
             
             # keep track of loss for plotting and saving
-
             
-#        ###dummy test
-#        pred_test = net.forward(test_image)
-#        pred_np = utils.var_to_np(pred_test)[0][0]
-#        
-#        new_mask = pred_np >= 0.5
-#        
-#        dummy = test_image_dum + 0
-#        
-#        channel = dummy[:, :, 0]
-#        channel[new_mask] = 1.0
-#        dummy[:, :, 0] = channel
-#            
-#        dummy = (dummy * 255).astype(np.uint8)
-#        io.imsave('./epoch_output/test_output_iter' + str(iteration) + '.png', dummy)
-                    
+
+        test_image = test.test_single_image(net, test_image_name)  
+        io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
+        
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average loss is ', epoch_loss)
         
