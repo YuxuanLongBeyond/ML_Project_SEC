@@ -71,7 +71,7 @@ def flip_both(image, mask):
         mask = np.flipud(mask)
     return image, mask
 
-def crop_both(image, mask, low_size = 1100, high_size = 2560, sq_prob = 0.4):
+def crop_both(image, mask, low_size = 608, high_size = 2560, sq_prob = 0.2):
     w, h, _ = image.shape
     
     crop_size = low_size + np.random.random() * (high_size - low_size)

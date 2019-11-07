@@ -45,7 +45,7 @@ if __name__ == '__main__':
     num_epochs = 1
     save_interval = 1
 
-    test_image_name = './data/main_data/training/images/satImage_001.png'
+    test_image_name = './data/main_data/test_set_images/test_1/test_1.png'
     resize = True
     
     lr = 2e-4
@@ -106,9 +106,7 @@ if __name__ == '__main__':
                 iteration, total_train_iters, loss.data.item()))
             
             # keep track of loss for plotting and saving
-            
-
-        test_image = test.test_single_image(net, test_image_name)  
+        test_image = test.test_single_image(net, test_image_name, resize = False)  
         io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
         
         epoch_loss /= num_batch

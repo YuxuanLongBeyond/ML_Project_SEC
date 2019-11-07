@@ -28,11 +28,13 @@ import utils
 # return output masks over test data
 # test for single image
 
-def test_single_image(net, file):
+def test_single_image(net, file, size = 384, resize = True):
     ##create single image tensor for test in each epoch
     test_image_origin = io.imread(file)
-    resize = False
-    test_image = utils.image_resize(test_image_origin, resize, 0)
+    test_image_origin = np.array(test_image_origin).astype(np.float32) / 255.0
+    if resize:
+        test_image_origin = transform.resize(test_image_origin, (size, size), mode = 'constant', anti_aliasing=True)
+    test_image = utils.image_resize(test_image_origin, resize, size)
     test_image = np.expand_dims(test_image, axis = 0)
     test_image = utils.np_to_var(torch.from_numpy(test_image))  
     
@@ -43,7 +45,7 @@ def test_single_image(net, file):
     new_mask = pred_np >= 0.5
 
     channel = test_image_origin[:, :, 0]
-    channel[new_mask] = 255
+    channel[new_mask] = 1.0
     test_image_origin[:, :, 0] = channel
     return test_image_origin
     
