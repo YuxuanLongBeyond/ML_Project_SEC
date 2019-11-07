@@ -111,12 +111,18 @@ class TestDataset(utils_data.Dataset):
     def __init__(self, root):
         self.root = root
         
-        self.file_list = [f for f in os.listdir(root) if os.path.isfile(os.path.join(root, f))]
+        self.file_list = []
+        for f in os.listdir(root):
+            name = os.path.join(root, f)
+            if not os.path.isfile(name):
+                
+                self.file_list.append(os.path.join(name, f) + '.png')
+#        self.file_list = [f for f in os.listdir(root) if os.path.isfile(os.path.join(root, f))]
 #        random.shuffle(self.mask_file_list)
         
 
     def __getitem__(self, index):
-        img_name = os.path.join(self.root, self.file_list[index])
+        img_name = os.path.join(self.file_list[index])
         
         image = io.imread(img_name)
         image = np.array(image).astype(np.float32) / 255.0

@@ -65,10 +65,10 @@ def test_batch_with_labels(net, file, image_size = 384, smooth = 1.0, lam = 1.0,
         epoch_loss += loss.data.item()        
     return epoch_loss
 
-def test_batch_without_labels(net, file):
+def test_batch_without_labels(net, file, batch_size = 5):
     # On the real test dataset
     test_dataset = utils.TestDataset(file)
-    dataloader = utils_data.DataLoader(dataset = test_dataset, batch_size = len(test_dataset), shuffle=False)
+    dataloader = utils_data.DataLoader(dataset = test_dataset, batch_size = batch_size, shuffle=False)
     count = 1
     for batch in dataloader:
         image = utils.np_to_var(batch['image'])
@@ -76,7 +76,8 @@ def test_batch_without_labels(net, file):
         
         pred = utils.var_to_np(pred)
         for i in range(pred.shape[0]):
-            mask = (pred[i][0] > 0.5)
+            mask = (pred[i][0] > 0.5) * 255
+            mask = mask.astype(np.uint8)
             io.imsave('./output/' + 'test' + str(count) + '.png', mask)
             count += 1
 
@@ -97,4 +98,5 @@ if __name__ == '__main__':
     
     loss = test_batch_with_labels(net, './data/main_data/training', image_size = image_size)
     
-    
+    file = './data/main_data/test_set_images/'
+    test_batch_without_labels(net, file)
