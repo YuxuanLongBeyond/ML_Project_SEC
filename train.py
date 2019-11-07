@@ -41,9 +41,9 @@ if __name__ == '__main__':
     data_augment = True
 
     image_size = 384
-    batch_size = 1
-    num_epochs = 1
-    save_interval = 1
+    batch_size = 10
+    num_epochs = 50
+    save_interval = 5
 
     test_image_name = './data/main_data/test_set_images/test_1/test_1.png'
     resize = True
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     
     
     if new_data:
-        root = './data/chicago'
+        root = '/content/drive/My Drive/ML_Project/chicago' ## only change this line
     else:
         root = './data/main_data/training'
      
@@ -106,8 +106,9 @@ if __name__ == '__main__':
                 iteration, total_train_iters, loss.data.item()))
             
             # keep track of loss for plotting and saving
-        test_image = test.test_single_image(net, test_image_name, resize = False)  
-        io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
+        if (epoch + 1) % save_interval == 0:
+            test_image = test.test_single_image(net, test_image_name, resize = False)  
+            io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
         
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average loss is ', epoch_loss)
@@ -118,4 +119,3 @@ if __name__ == '__main__':
     with open('loss.txt', 'wt') as file:
         file.write('\n'.join(['{}'.format(loss) for loss in loss_history]))
         file.write('\n')
-
