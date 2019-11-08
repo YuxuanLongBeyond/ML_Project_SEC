@@ -86,8 +86,9 @@ def test_batch_without_labels(net, file, batch_size = 5):
 if __name__ == '__main__':
     test_dir = './data/main_data/test'
     test_with_labels = True
+    fix_res = True
     
-    net = utils.create_models()
+    net = utils.create_models(fix_res)
     net.load_state_dict(torch.load('./parameters/weights'))
     net.eval()
     
@@ -98,7 +99,7 @@ if __name__ == '__main__':
 #    test_single_image(net, image_file_name)
     
     
-    loss = test_batch_with_labels(net, './data/main_data/training', image_size = image_size)
+#    loss = test_batch_with_labels(net, './data/main_data/training', image_size = image_size)
     
     file = './data/main_data/test_set_images/'
     test_batch_without_labels(net, file)

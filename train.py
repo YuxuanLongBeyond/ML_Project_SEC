@@ -37,13 +37,16 @@ if RUN_ON_GPU:
 
 
 if __name__ == '__main__':
-    new_data = True
+    new_data = False
     data_augment = True
+    
+    fix_res = True
 
     image_size = 384
-    batch_size = 10
-    num_epochs = 30
+    batch_size = 20
+    num_epochs = 300
     save_interval = 5
+    save_ckpt = 100
 
     test_image_name = './data/main_data/test_set_images/test_1/test_1.png'
     resize = True
@@ -57,7 +60,7 @@ if __name__ == '__main__':
     
     if new_data:
         root = './data/chicago'
-#        root = '/content/drive/My Drive/ML_Project/chicago' ## only change this line
+        # root = '/content/drive/My Drive/ML_Project/chicago' ## only change this line
     else:
         root = './data/main_data/training'
      
@@ -69,7 +72,7 @@ if __name__ == '__main__':
         os.makedirs('./parameters')    
     
     
-    net = utils.create_models()
+    net = utils.create_models(fix_res)
     # create optimizers
     optimizer = optim.Adam(net.parameters(), lr = lr, weight_decay = weight_decay, amsgrad = True)
     Loss = utils.loss(smooth, lam, beta)
@@ -86,6 +89,7 @@ if __name__ == '__main__':
         print('Start epoch ', epoch)
         epoch_loss = 0 
         for iteration, batch in enumerate(dataloader, epoch * num_batch + 1):
+            t = time.time()
             print('Iteration: ', iteration)
             image = utils.np_to_var(batch['image'])
             mask = utils.np_to_var(batch['mask'])
@@ -106,11 +110,14 @@ if __name__ == '__main__':
             # print the log info
             print('Iteration [{:6d}/{:6d}] | loss: {:.4f}'.format(
                 iteration, total_train_iters, loss.data.item()))
-
+            print('Time spent: ', time.time() - t, ' s')
             # keep track of loss for plotting and saving
         if (epoch + 1) % save_interval == 0:
             test_image = test.test_single_image(net, test_image_name, resize = False)  
             io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
+        
+        if (epoch + 1) % save_ckpt == 0:
+            torch.save(net.state_dict(), './parameters/weights')
         
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average loss is ', epoch_loss)
