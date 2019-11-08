@@ -117,6 +117,7 @@ class TestDataset(utils_data.Dataset):
             if not os.path.isfile(name):
                 
                 self.file_list.append(os.path.join(name, f) + '.png')
+        self.file_list.sort()
 #        self.file_list = [f for f in os.listdir(root) if os.path.isfile(os.path.join(root, f))]
 #        random.shuffle(self.mask_file_list)
         

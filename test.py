@@ -32,9 +32,11 @@ def test_single_image(net, file, size = 384, resize = True):
     ##create single image tensor for test in each epoch
     test_image_origin = io.imread(file)
     test_image_origin = np.array(test_image_origin).astype(np.float32) / 255.0
+    test_image = test_image_origin
     if resize:
         test_image_origin = transform.resize(test_image_origin, (size, size), mode = 'constant', anti_aliasing=True)
-    test_image = utils.image_resize(test_image_origin, resize, size)
+    
+        test_image = utils.image_resize(test_image_origin, resize, size)
     test_image = np.expand_dims(test_image, axis = 0)
     test_image = utils.np_to_var(torch.from_numpy(test_image))  
     
@@ -42,12 +44,13 @@ def test_single_image(net, file, size = 384, resize = True):
     pred_test = net.forward(test_image)
     pred_np = utils.var_to_np(pred_test)[0][0]
     
-    new_mask = pred_np >= 0.5
+    new_mask = (pred_np >= 0.5)
 
     channel = test_image_origin[:, :, 0]
     channel[new_mask] = 1.0
     test_image_origin[:, :, 0] = channel
-    return test_image_origin
+    mask = new_mask * 255
+    return mask.astype(np.uint8), test_image_origin
     
 def test_batch_with_labels(net, file, image_size = 384, smooth = 1.0, lam = 1.0, beta = 0.5):
 
@@ -102,4 +105,31 @@ if __name__ == '__main__':
 #    loss = test_batch_with_labels(net, './data/main_data/training', image_size = image_size)
     
     file = './data/main_data/test_set_images/'
-    test_batch_without_labels(net, file)
+    for i in range(1, 51):
+        t = 'test_' + str(i)
+        name = file + t + '/' + t + '.png'
+        test_image_origin = io.imread(name)
+        test_image_origin = np.array(test_image_origin).astype(np.float32) / 255.0
+        test_image = test_image_origin
+        if resize:
+            test_image_origin = transform.resize(test_image_origin, (size, size), mode = 'constant', anti_aliasing=True)
+        
+            test_image = utils.image_resize(test_image_origin, resize, size)
+        else:
+
+            test_image = np.moveaxis(test_image, 2, 0).astype(np.float32) # tensor format    
+        test_image = np.expand_dims(test_image, axis = 0)
+        test_image = utils.np_to_var(torch.from_numpy(test_image))  
+        
+        ###dummy test
+        pred_test = net.forward(test_image)
+        pred_np = utils.var_to_np(pred_test)[0][0]
+        
+        new_mask = (pred_np >= 0.5)
+
+        channel = test_image_origin[:, :, 0]
+        channel[new_mask] = 1.0
+        test_image_origin[:, :, 0] = channel
+        mask = new_mask * 255
+        mask = mask.astype(np.uint8)
+        io.imsave('./output/' + 'test' + str(i) + '.png', mask)
