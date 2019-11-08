@@ -41,7 +41,7 @@ if __name__ == '__main__':
     data_augment = True
 
     image_size = 384
-    batch_size = 20
+    batch_size = 10
     num_epochs = 30
     save_interval = 5
 
@@ -56,7 +56,8 @@ if __name__ == '__main__':
     
     
     if new_data:
-        root = '/content/drive/My Drive/ML_Project/chicago' ## only change this line
+        root = './data/chicago'
+#        root = '/content/drive/My Drive/ML_Project/chicago' ## only change this line
     else:
         root = './data/main_data/training'
      
@@ -88,6 +89,7 @@ if __name__ == '__main__':
             print('Iteration: ', iteration)
             image = utils.np_to_var(batch['image'])
             mask = utils.np_to_var(batch['mask'])
+            
 
             optimizer.zero_grad()
 
@@ -104,7 +106,7 @@ if __name__ == '__main__':
             # print the log info
             print('Iteration [{:6d}/{:6d}] | loss: {:.4f}'.format(
                 iteration, total_train_iters, loss.data.item()))
-            
+
             # keep track of loss for plotting and saving
         if (epoch + 1) % save_interval == 0:
             test_image = test.test_single_image(net, test_image_name, resize = False)  
