@@ -71,40 +71,40 @@ def flip_both(image, mask):
         mask = np.flipud(mask)
     return image, mask
 
-def crop_both(image, mask, low_size = 608, high_size = 2560, sq_prob = 0.2):
+def crop_both(image, mask, low_size = 608, high_size = 2560):
     w, h, _ = image.shape
     
     crop_size = low_size + np.random.random() * (high_size - low_size)
     crop_size = round(crop_size)
     
-    r1 = np.random.random()
+#    r1 = np.random.random()
     r2 = np.random.random()
-    if r1 < sq_prob:
-        if r2 < 0.5:
-            # left
-            image = image[:, 0:high_size, :]
-            mask = mask[:, 0:high_size]
-        else:
-            # right
-            image = image[:, (h - crop_size):, :]
-            mask = mask[:, (h - crop_size):]
+#    if r1 < sq_prob:
+#        if r2 < 0.5:
+#            # left
+#            image = image[:, 0:high_size, :]
+#            mask = mask[:, 0:high_size]
+#        else:
+#            # right
+#            image = image[:, (h - high_size):, :]
+#            mask = mask[:, (h - high_size):]
+#    else:
+    if r2 < 0.25:
+        # left upper
+        image = image[0:crop_size, 0:crop_size, :]
+        mask = mask[0:crop_size, 0:crop_size]
+    elif r2 < 0.5:
+        # right upper
+        image = image[0:crop_size, (h - crop_size):, :]
+        mask = mask[0:crop_size, (h - crop_size):]
+    elif r2 < 0.75:
+        # right bottom
+        image = image[(w - crop_size):, (h - crop_size):, :]
+        mask = mask[(w - crop_size):, (h - crop_size):]
     else:
-        if r2 < 0.25:
-            # left upper
-            image = image[0:crop_size, 0:crop_size, :]
-            mask = mask[0:crop_size, 0:crop_size]
-        elif r2 < 0.5:
-            # right upper
-            image = image[0:crop_size, (h - crop_size):, :]
-            mask = mask[0:crop_size, (h - crop_size):]
-        elif r2 < 0.75:
-            # right bottom
-            image = image[(w - crop_size):, (h - crop_size):, :]
-            mask = mask[(w - crop_size):, (h - crop_size):]
-        else:
-            # left bottom
-            image = image[(w - crop_size):, 0:crop_size, :]
-            mask = mask[(w - crop_size):, 0:crop_size]
+        # left bottom
+        image = image[(w - crop_size):, 0:crop_size, :]
+        mask = mask[(w - crop_size):, 0:crop_size]
     return image, mask
        
 class TestDataset(utils_data.Dataset):
@@ -198,11 +198,11 @@ class MyNewDataset(utils_data.Dataset):
         
         image = io.imread(img_name)
         mask = io.imread(mask_name)
-        mask = mask[:, :, 0]
-        image, mask = normalize_both(image, mask)
+        mask = (mask[:, :, 0] == 0).astype(np.float32)
+        image = np.array(image).astype(np.float32) / 255.0
         
         if self.data_augment:
-            image, mask = crop_both(image, mask, low_size = 1100, high_size = 2560, sq_prob = 0.4)
+            image, mask = crop_both(image, mask)
             image, mask = rotate_both(image, mask)
             image, mask = flip_both(image, mask)
         

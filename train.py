@@ -41,8 +41,8 @@ if __name__ == '__main__':
     data_augment = True
 
     image_size = 384
-    batch_size = 10
-    num_epochs = 50
+    batch_size = 20
+    num_epochs = 30
     save_interval = 5
 
     test_image_name = './data/main_data/test_set_images/test_1/test_1.png'
