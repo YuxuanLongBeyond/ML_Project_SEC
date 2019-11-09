@@ -12,15 +12,15 @@ from torchvision import models
 
 class LinkNet(nn.Module):
     # from Resnet34
-    def __init__(self, fix_res = True):
+    def __init__(self):
         
         # subclass nn.Module
         super(LinkNet, self).__init__()
         
         resnet = models.resnet34(pretrained = True)
         
-        for param in resnet.parameters():
-            param.requires_grad = not fix_res
+#        for param in resnet.parameters():
+#            param.requires_grad = not fix_res
 
         layer0 = [resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool]
         self.layer0 = nn.Sequential(*layer0)

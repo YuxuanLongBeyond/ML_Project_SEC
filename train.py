@@ -40,10 +40,9 @@ if __name__ == '__main__':
     new_data = False
     data_augment = True
     
-    fix_res = True
 
     image_size = 384
-    batch_size = 1
+    batch_size = 20
     num_epochs = 300
     save_interval = 5
     save_ckpt = 100
@@ -113,8 +112,9 @@ if __name__ == '__main__':
             print('Time spent: ', time.time() - t, ' s')
             # keep track of loss for plotting and saving
         if (epoch + 1) % save_interval == 0:
-            test_image = test.test_single_image(net, test_image_name, resize = False)  
-            io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
+            with torch.no_grad():
+                _, test_image = test.test_single_image(net, test_image_name, resize = False)  
+                io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
         
         if (epoch + 1) % save_ckpt == 0:
             torch.save(net.state_dict(), './parameters/weights')

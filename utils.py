@@ -193,9 +193,9 @@ def get_data_loader(root, new_data = True, resize = True, data_augment = True,
     return utils_data.DataLoader(dataset = train_dataset, batch_size = batch_size, shuffle=True)
 
 
-def create_models(fix_res = True):
+def create_models():
 
-    net = model.LinkNet(fix_res)
+    net = model.LinkNet()
 
     if RUN_ON_GPU:
         print('Moving models to GPU.')

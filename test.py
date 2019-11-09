@@ -93,7 +93,7 @@ if __name__ == '__main__':
     test_with_labels = True
     fix_res = True
     
-    net = utils.create_models(fix_res)
+    net = utils.create_models()
     net.load_state_dict(torch.load('./parameters/weights'))
     net.eval()
     
@@ -118,7 +118,6 @@ if __name__ == '__main__':
         
             test_image = utils.image_resize(test_image_origin, resize, size)
         else:
-
             test_image = np.moveaxis(test_image, 2, 0).astype(np.float32) # tensor format    
         test_image = np.expand_dims(test_image, axis = 0)
         test_image = utils.np_to_var(torch.from_numpy(test_image))  
