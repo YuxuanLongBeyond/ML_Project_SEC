@@ -19,9 +19,8 @@ class LinkNet(nn.Module):
         
         resnet = models.resnet34(pretrained = True)
         
-        if fix_res:
-            for param in resnet.parameters():
-                param.requires_grad = False
+        for param in resnet.parameters():
+            param.requires_grad = not fix_res
 
         layer0 = [resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool]
         self.layer0 = nn.Sequential(*layer0)

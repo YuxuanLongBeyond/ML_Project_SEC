@@ -32,11 +32,13 @@ def test_single_image(net, file, size = 384, resize = True):
     ##create single image tensor for test in each epoch
     test_image_origin = io.imread(file)
     test_image_origin = np.array(test_image_origin).astype(np.float32) / 255.0
-    test_image = test_image_origin
     if resize:
         test_image_origin = transform.resize(test_image_origin, (size, size), mode = 'constant', anti_aliasing=True)
     
         test_image = utils.image_resize(test_image_origin, resize, size)
+    else:
+        test_image = test_image_origin
+        test_image = np.moveaxis(test_image, 2, 0).astype(np.float32) # tensor format  
     test_image = np.expand_dims(test_image, axis = 0)
     test_image = utils.np_to_var(torch.from_numpy(test_image))  
     

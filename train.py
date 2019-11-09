@@ -43,7 +43,7 @@ if __name__ == '__main__':
     fix_res = True
 
     image_size = 384
-    batch_size = 20
+    batch_size = 1
     num_epochs = 300
     save_interval = 5
     save_ckpt = 100
