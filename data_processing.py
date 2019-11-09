@@ -42,7 +42,7 @@ def crop_both(image, mask, low_size = 608, high_size = 2560):
 
 if __name__ == '__main__':
     root = './data/test_only'
-    thresh = 0.001
+    thresh = 0.01
     
 
     image_file_list = []

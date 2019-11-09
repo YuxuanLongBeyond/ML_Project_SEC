@@ -71,7 +71,7 @@ if __name__ == '__main__':
         os.makedirs('./parameters')    
     
     
-    net = utils.create_models(fix_res)
+    net = utils.create_models()
     # create optimizers
     optimizer = optim.Adam(net.parameters(), lr = lr, weight_decay = weight_decay, amsgrad = True)
     Loss = utils.loss(smooth, lam, beta)
