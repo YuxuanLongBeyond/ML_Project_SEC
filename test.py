@@ -100,7 +100,7 @@ if __name__ == '__main__':
     resize = False
     image_size = 384
     
-    image_file_name = './data/main_data/test/test_01.png'
+#    image_file_name = './data/main_data/test/test_01.png'
 #    test_single_image(net, image_file_name)
     
     
