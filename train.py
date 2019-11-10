@@ -42,15 +42,15 @@ if __name__ == '__main__':
     
 
     image_size = 384
-    batch_size = 20
-    num_epochs = 300
-    save_interval = 5
-    save_ckpt = 100
+    batch_size = 50
+    num_epochs = 100
+    save_interval = 1
+    save_ckpt = 20
 
     test_image_name = './data/main_data/test_set_images/test_1/test_1.png'
-    resize = True
+    resize = False
     
-    lr = 2e-4
+    lr = 1e-5 # 2e-4
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
@@ -60,8 +60,10 @@ if __name__ == '__main__':
     if new_data:
         root = './data/chicago'
         # root = '/content/drive/My Drive/ML_Project/chicago' ## only change this line
+
     else:
-        root = './data/main_data/training'
+        # root = './data/main_data/training'
+        root = '../my_data'
      
     if os.path.exists('./epoch_output'):
         shutil.rmtree('./epoch_output')

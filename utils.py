@@ -105,15 +105,16 @@ class MyDataset(utils_data.Dataset):
         self.size = size
         self.root = root
         self.data_augment = data_augment
-        mask_dir = root + '/groundtruth'
+        mask_dir = root + '/ground_truth'
         self.resize = resize
-        self.mask_file_list = [f for f in os.listdir(mask_dir) if os.path.isfile(os.path.join(mask_dir, f))]
+#        self.mask_file_list = [f for f in os.listdir(mask_dir) if os.path.isfile(os.path.join(mask_dir, f))]
+        self.mask_file_list = [f for f in os.listdir(mask_dir) if 'sat' in f and 'png' in f]
 #        random.shuffle(self.mask_file_list)
 
     def __getitem__(self, index):
         file_name =  self.mask_file_list[index].rsplit('.', 1)[0]
-        img_name = self.root + '/images/' + file_name+'.png'
-        mask_name = self.root + '/groundtruth/' + file_name+'.png'
+        img_name = self.root + '/train/' + file_name+'.png'
+        mask_name = self.root + '/ground_truth/' + file_name+'.png'
         
         image = io.imread(img_name)
         mask = io.imread(mask_name)
