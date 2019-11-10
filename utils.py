@@ -105,7 +105,7 @@ class MyDataset(utils_data.Dataset):
         self.size = size
         self.root = root
         self.data_augment = data_augment
-        mask_dir = root + '/ground_truth'
+        mask_dir = root + '/groundtruth'
         self.resize = resize
 #        self.mask_file_list = [f for f in os.listdir(mask_dir) if os.path.isfile(os.path.join(mask_dir, f))]
         self.mask_file_list = [f for f in os.listdir(mask_dir) if 'sat' in f and 'png' in f]
