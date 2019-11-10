@@ -113,8 +113,8 @@ class MyDataset(utils_data.Dataset):
 
     def __getitem__(self, index):
         file_name =  self.mask_file_list[index].rsplit('.', 1)[0]
-        img_name = self.root + '/train/' + file_name+'.png'
-        mask_name = self.root + '/ground_truth/' + file_name+'.png'
+        img_name = self.root + '/images/' + file_name+'.png'
+        mask_name = self.root + '/groundtruth/' + file_name+'.png'
         
         image = io.imread(img_name)
         mask = io.imread(mask_name)
