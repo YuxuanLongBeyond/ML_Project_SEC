@@ -37,32 +37,29 @@ if RUN_ON_GPU:
 
 
 if __name__ == '__main__':
-    new_data = False
+    new_data = True
     data_augment = True
     
 
     image_size = 384
-    batch_size = 20
-    num_epochs = 200
-    save_interval = 5
-    save_ckpt = 10
-    test_image_name = './data/main_data/test_set_images/test_1/test_1.png'
-    resize = False
+    batch_size = 50
+    num_epochs = 60
+    save_interval = 1
+    save_ckpt = 1
+    test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
     
-    lr = 2e-4 # 2e-4
+    lr = 1e-4 # 2e-4
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
-    beta = 0.5
     
     
     if new_data:
-        root = './data/chicago'
-        # root = '/content/drive/My Drive/ML_Project/chicago' ## only change this line
-
-    else:
-        # root = './data/main_data/training'
         root = '../my_data'
+        resize = False
+    else:
+        root = './data/main_data/training'
+        resize = True
      
     if os.path.exists('./epoch_output'):
         shutil.rmtree('./epoch_output')
@@ -74,13 +71,13 @@ if __name__ == '__main__':
     
     net = utils.create_models()
     net.train()
-    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
+    # net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
     # create optimizers
     optimizer = optim.Adam(net.parameters(), lr = lr, weight_decay = weight_decay, amsgrad = True)
-    Loss = utils.loss(smooth, lam, beta)
+    Loss = utils.loss(smooth, lam)
 
 
-    dataloader = utils.get_data_loader(root, new_data, resize, data_augment, image_size, batch_size)
+    dataloader = utils.get_data_loader(root, False, resize, data_augment, image_size, batch_size)
     num_batch = len(dataloader)
     total_train_iters = num_epochs * num_batch
 
