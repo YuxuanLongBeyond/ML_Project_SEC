@@ -20,7 +20,7 @@ class LinkNet(nn.Module):
         resnet = models.resnet34(pretrained = True)
         
         for param in resnet.parameters():
-            param.requires_grad = False
+            param.requires_grad = True
 
         layer0 = [resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool]
         self.layer0 = nn.Sequential(*layer0)
