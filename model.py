@@ -19,8 +19,8 @@ class LinkNet(nn.Module):
         
         resnet = models.resnet34(pretrained = True)
 #        
-        for param in resnet.parameters():
-            param.requires_grad = False
+#        for param in resnet.parameters():
+#            param.requires_grad = False
 
         layer0 = [resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool]
         self.layer0 = nn.Sequential(*layer0)
@@ -87,14 +87,18 @@ class Loss(nn.Module):
         self.beta = beta        
     
     def bce_loss(self, pred, mask):
-        bce = - self.beta * mask * torch.log(pred) - (1 - self.beta) * (1 - mask) * torch.log(1 - pred)
-        return torch.mean(bce)
-
+#        bce = - self.beta * mask * torch.log(pred) - (1.0 - self.beta) * (1.0 - mask) * torch.log(1.0 - pred)
+        
+#        return torch.mean(bce)
+        loss = nn.BCELoss()
+        return loss(pred, mask)
+        
+        
     def dice_loss(self, pred, mask):
         
         numer = 2.0 * torch.sum(pred * mask, (1, 2, 3))
         denom = torch.sum(pred, (1, 2, 3)) + torch.sum(mask, (1, 2, 3))
-        loss_batch = 1 - (numer + self.smooth) / (denom + self.smooth)
+        loss_batch = 1.0 - (numer + self.smooth) / (denom + self.smooth)
         return torch.mean(loss_batch)
         
     def final_loss(self, pred, mask):
