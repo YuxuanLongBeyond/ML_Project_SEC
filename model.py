@@ -83,8 +83,7 @@ class Loss(nn.Module):
         super(Loss, self).__init__()
 
         self.smooth = smooth
-        self.lam = lam
-        self.beta = beta        
+        self.lam = lam    
     
     def bce_loss(self, pred, mask):
 #        bce = - self.beta * mask * torch.log(pred) - (1.0 - self.beta) * (1.0 - mask) * torch.log(1.0 - pred)

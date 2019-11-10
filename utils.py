@@ -207,5 +207,5 @@ def create_models():
     return net
 
 
-def loss(smooth, lam, beta):
-    return model.Loss(smooth, lam, beta)
+def loss(smooth, lam):
+    return model.Loss(smooth, lam)

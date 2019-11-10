@@ -22,7 +22,7 @@ import torch.optim as optim
 import utils
 import test
 
-
+from torch import autograd
 
 
 # Run on GPU if CUDA is available.
@@ -42,15 +42,14 @@ if __name__ == '__main__':
     
 
     image_size = 384
-    batch_size = 50
-    num_epochs = 100
-    save_interval = 1
-    save_ckpt = 20
-
+    batch_size = 20
+    num_epochs = 200
+    save_interval = 5
+    save_ckpt = 10
     test_image_name = './data/main_data/test_set_images/test_1/test_1.png'
     resize = False
     
-    lr = 1e-5 # 2e-4
+    lr = 2e-4 # 2e-4
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
@@ -74,6 +73,8 @@ if __name__ == '__main__':
     
     
     net = utils.create_models()
+    net.train()
+    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
     # create optimizers
     optimizer = optim.Adam(net.parameters(), lr = lr, weight_decay = weight_decay, amsgrad = True)
     Loss = utils.loss(smooth, lam, beta)
