@@ -79,7 +79,7 @@ class Decoder(nn.Module):
         return x        
     
 class Loss(nn.Module):
-    def __init__(self, smooth, lam, beta):
+    def __init__(self, smooth, lam):
         super(Loss, self).__init__()
 
         self.smooth = smooth
