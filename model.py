@@ -94,7 +94,7 @@ class Loss(nn.Module):
         
         
     def dice_loss(self, pred, mask):
-        
+        # note that numer / denom is just F1 score
         numer = 2.0 * torch.sum(pred * mask, (1, 2, 3))
         denom = torch.sum(pred, (1, 2, 3)) + torch.sum(mask, (1, 2, 3))
         loss_batch = 1.0 - (numer + self.smooth) / (denom + self.smooth)

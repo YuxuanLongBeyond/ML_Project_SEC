@@ -23,6 +23,7 @@ import torch.utils.data as utils_data
 
 import utils
 
+RUN_ON_GPU = torch.cuda.is_available()
 #####test####
 # return loss over test data, if labels provided
 # return output masks over test data
@@ -54,23 +55,31 @@ def test_single_image(net, file, size = 384, resize = True):
     mask = new_mask * 255
     return mask.astype(np.uint8), test_image_origin
     
-def test_batch_with_labels(net, file, image_size = 384, smooth = 1.0, lam = 1.0, beta = 0.5):
-
+def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth = 1.0, lam = 1.0):
     # On our validation test dataset
     resize = True
     data_augment = False
     test_dataset = utils.MyDataset(file, resize, data_augment, image_size)
-    dataloader = utils_data.DataLoader(dataset = test_dataset, batch_size = len(test_dataset), shuffle=False)
+    dataloader = utils_data.DataLoader(dataset = test_dataset, batch_size = batch_size, shuffle=False)
     epoch_loss = 0.0
-    Loss = utils.loss(smooth, lam, beta)
-    for batch in dataloader:
+    numer = 0.0
+    denom = 0.0
+    Loss = utils.loss(smooth, lam)
+    for i, batch in enumerate(dataloader):
+        print('Test on batch %d'%i)
         image = utils.np_to_var(batch['image'])
         mask = utils.np_to_var(batch['mask'])
         pred = net.forward(image)
         
         loss = Loss.final_loss(pred, mask)
-        epoch_loss += loss.data.item()        
-    return epoch_loss
+        epoch_loss += loss.data.item() * batch_size
+        
+        numer += utils.var_to_np(mask * pred).sum()
+        denom += utils.var_to_np(mask).sum() + utils.var_to_np(pred).sum()
+        
+    epoch_loss /= len(dataloader)
+    f1 = 2.0 * numer / denom
+    return epoch_loss, f1
 
 def test_batch_without_labels(net, file, batch_size = 5):
     # On the real test dataset
@@ -90,25 +99,29 @@ def test_batch_without_labels(net, file, batch_size = 5):
 
 if __name__ == '__main__':
     test_dir = './data/main_data/test'
+    test_set_output = False
     test_with_labels = True
-    fix_res = True
-    
+
     net = utils.create_models()
-    net.load_state_dict(torch.load('./parameters/weights'))
+#    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
+    if RUN_ON_GPU:
+        net.load_state_dict(torch.load('./parameters/weights'))
+    else:
+        net.load_state_dict(torch.load('./parameters/weights', map_location = lambda storage, loc: storage))
     net.eval()
     
     resize = False
     image_size = 384
-    
-#    image_file_name = './data/main_data/test/test_01.png'
-#    test_single_image(net, image_file_name)
-    
-    
-#    loss = test_batch_with_labels(net, './data/main_data/training', image_size = image_size)
-    
-    file = './data/main_data/test_set_images/'
-    for i in range(1, 51):
-        t = 'test_' + str(i)
-        name = file + t + '/' + t + '.png'
-        mask, image = test_single_image(net, name, size = 384, resize = False)
-        io.imsave('./output/' + 'test' + str(i) + '.png', mask)
+
+    if test_set_output:    
+        file = './data/main_data/test_set_images/'
+        for i in range(1, 51):
+            t = 'test_' + str(i)
+            name = file + t + '/' + t + '.png'
+            mask, image = test_single_image(net, name, size = 384, resize = False)
+            io.imsave('./output/' + 'test' + str(i) + '.png', mask)
+            
+    if test_with_labels:
+        file = './data/main_data/training'
+        loss, f1 = test_batch_with_labels(net, file, batch_size = 1, image_size = 384, smooth = 1.0, lam = 1.0)
+        

@@ -55,7 +55,7 @@ if __name__ == '__main__':
     
     
     if new_data:
-        root = '../my_data'
+        root = './data/my_data'
         resize = False
     else:
         root = './data/main_data/training'
