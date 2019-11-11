@@ -100,7 +100,7 @@ def test_batch_without_labels(net, file, batch_size = 5):
 if __name__ == '__main__':
     test_dir = './data/main_data/test'
     test_set_output = False
-    test_with_labels = True
+    test_with_labels = False
 
     net = utils.create_models()
 #    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))

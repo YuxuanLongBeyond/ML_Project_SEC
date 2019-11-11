@@ -53,12 +53,13 @@ if __name__ == '__main__':
     smooth = 1.0
     lam = 1.0
     
-    
+    new_root = './data/my_data'
+    old_root = './data/main_data/training'
     if new_data:
-        root = './data/my_data'
+        root = new_root
         resize = False
     else:
-        root = './data/main_data/training'
+        root = old_root
         resize = True
      
     if os.path.exists('./epoch_output'):
@@ -83,13 +84,15 @@ if __name__ == '__main__':
 
     loss_history = []
     print('Started training at {}'.format(time.asctime(time.localtime(time.time()))))
-    
+    test_loss = 10.0
     for epoch in range(num_epochs):
         print('Start epoch ', epoch)
         epoch_loss = 0 
+        t = time.time()
         for iteration, batch in enumerate(dataloader, epoch * num_batch + 1):
-            t = time.time()
             print('Iteration: ', iteration)
+            print('Time for loading the data takes: ', time.time() - t, ' s')
+            t = time.time()
             image = utils.np_to_var(batch['image'])
             mask = utils.np_to_var(batch['mask'])
             
@@ -109,12 +112,23 @@ if __name__ == '__main__':
             # print the log info
             print('Iteration [{:6d}/{:6d}] | loss: {:.4f}'.format(
                 iteration, total_train_iters, loss.data.item()))
-            print('Time spent: ', time.time() - t, ' s')
+            print('Time spent on back propagation: ', time.time() - t, ' s')
+            t = time.time()
             # keep track of loss for plotting and saving
         if (epoch + 1) % save_interval == 0:
             with torch.no_grad():
                 _, test_image = test.test_single_image(net, test_image_name, resize = False)  
                 io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
+        
+        if new_data:
+            loss, f1 = test.test_batch_with_labels(net, old_root, batch_size = 10, image_size = 384, smooth = 1.0, lam = 1.0)
+            print('On the validation dataset, loss: ', loss, ', F1: ', f1)
+            if loss <= test_loss:
+                test_loss = loss
+            else:
+                print('The new loss is found to be larger than before')
+                print('Break the update at ', epoch, 'th epoch')
+                break
         
         if (epoch + 1) % save_ckpt == 0:
             torch.save(net.state_dict(), './parameters/weights')
