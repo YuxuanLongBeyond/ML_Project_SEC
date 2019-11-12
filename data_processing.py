@@ -39,6 +39,29 @@ def crop_both(image, mask, index, i_s, fixed_size = 1280, step = 400):
         mask = mask[(c_y - rand_size):(c_y + rand_size), (c_x - rand_size):(c_x + rand_size)]
     return image, mask
 
+def crop_from_center(image, mask, crop_size = 2560):
+    w, h, _ = image.shape
+    c_y = w // 2
+    c_x = h // 2
+    rand_size = crop_size // 2
+    image = image[(c_y - rand_size):(c_y + rand_size), (c_x - rand_size):(c_x + rand_size), :]
+    mask = mask[(c_y - rand_size):(c_y + rand_size), (c_x - rand_size):(c_x + rand_size)]
+    return image, mask
+
+def crop_from_ones(image, mask, crop_size = 2560):
+    w, h, _ = image.shape
+    c_y = w // 2
+    c_x = h // 2
+    rand_size = crop_size // 2
+
+    mask_c = mask[(c_y - rand_size):(c_y + rand_size), (c_x - rand_size):(c_x + rand_size)]
+    
+    mask_l = mask[:, 0:crop_size]
+    
+    mask_r = mask[:, (h - crop_size):]
+    
+    return image, mask
+
 if __name__ == '__main__':
     root = './data/chicago'
     thresh = 0.01
@@ -57,7 +80,7 @@ if __name__ == '__main__':
     file_num = len(image_file_list)
     file_list = [[image_file_list[i], label_file_list[i]] for i in range(file_num)]  
     
-    out_size = 384
+    out_size = 608
     num = 50
     count = 1
     for pair in file_list:
@@ -75,30 +98,35 @@ if __name__ == '__main__':
         image = np.array(image).astype(np.float32) / 255.0
         
         
-        for j in range(4):
-            k = 0
-            image_hat, mask_hat = crop_both(image, mask, j, k)
-                
-                
-            ratio = np.sum(mask_hat) / (mask_hat.shape[0] * mask_hat.shape[1])
-            if ratio >= thresh:
-                image_hat = transform.resize(image_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
-                mask_hat = transform.resize(mask_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
-                name = 'sat%d_%d_%d.png' % (count, j, k)
-                io.imsave('./data/my_data/images/' + name, image_hat)
-                io.imsave('./data/my_data/groundtruth/' + name, mask_hat)
-                
-        for k in range(3):
-            j = 4
-            image_hat, mask_hat = crop_both(image, mask, j, k)
-                
-                
-            ratio = np.sum(mask_hat) / (mask_hat.shape[0] * mask_hat.shape[1])
-            if ratio >= thresh:
-                image_hat = transform.resize(image_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
-                mask_hat = transform.resize(mask_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
-                name = 'sat%d_%d_%d.png' % (count, j, k)
-                io.imsave('./data/my_data/images/' + name, image_hat)
-                io.imsave('./data/my_data/groundtruth/' + name, mask_hat)
-                
+#        for j in range(4):
+#            k = 0
+#            image_hat, mask_hat = crop_both(image, mask, j, k)
+#                
+#                
+#            ratio = np.sum(mask_hat) / (mask_hat.shape[0] * mask_hat.shape[1])
+#            if ratio >= thresh:
+#                image_hat = transform.resize(image_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
+#                mask_hat = transform.resize(mask_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
+#                name = 'sat%d_%d_%d.png' % (count, j, k)
+#                io.imsave('./data/my_data/images/' + name, image_hat)
+#                io.imsave('./data/my_data/groundtruth/' + name, mask_hat)
+#                
+#        for k in range(3):
+#            j = 4
+#            image_hat, mask_hat = crop_both(image, mask, j, k)
+#                
+#                
+#            ratio = np.sum(mask_hat) / (mask_hat.shape[0] * mask_hat.shape[1])
+#            if ratio >= thresh:
+#                image_hat = transform.resize(image_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
+#                mask_hat = transform.resize(mask_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
+#                name = 'sat%d_%d_%d.png' % (count, j, k)
+#                io.imsave('./data/my_data/images/' + name, image_hat)
+#                io.imsave('./data/my_data/groundtruth/' + name, mask_hat)
+        image_hat, mask_hat = crop_from_center(image, mask)
+        image_hat = transform.resize(image_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
+        mask_hat = transform.resize(mask_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
+        name = 'sat%d.png' % count
+        io.imsave('./data/my_data/images/' + name, image_hat)
+        io.imsave('./data/my_data/groundtruth/' + name, mask_hat)
         count += 1

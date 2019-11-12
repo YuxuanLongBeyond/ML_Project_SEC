@@ -42,8 +42,8 @@ if __name__ == '__main__':
     early_stop = False
 
     image_size = 384
-    batch_size = 50
-    num_epochs = 60
+    batch_size = 20
+    num_epochs = 100
     save_interval = 1
     save_ckpt = 1
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
