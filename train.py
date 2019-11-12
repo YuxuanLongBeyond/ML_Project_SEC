@@ -39,7 +39,7 @@ if RUN_ON_GPU:
 if __name__ == '__main__':
     new_data = True
     data_augment = True
-    
+    early_stop = False
 
     image_size = 384
     batch_size = 50
@@ -118,10 +118,11 @@ if __name__ == '__main__':
         if (epoch + 1) % save_interval == 0:
             with torch.no_grad():
                 _, test_image = test.test_single_image(net, test_image_name, resize = False)  
-                io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
+            io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
         
-        if new_data:
-            loss, f1 = test.test_batch_with_labels(net, old_root, batch_size = 10, image_size = 384, smooth = 1.0, lam = 1.0)
+        if new_data and early_stop:
+            with torch.no_grad():
+                loss, f1 = test.test_batch_with_labels(net, old_root, batch_size = 10, image_size = 384, smooth = 1.0, lam = 1.0)
             print('On the validation dataset, loss: ', loss, ', F1: ', f1)
             if loss <= test_loss:
                 test_loss = loss
