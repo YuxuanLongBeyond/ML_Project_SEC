@@ -113,6 +113,7 @@ if __name__ == '__main__':
             print('Iteration [{:6d}/{:6d}] | loss: {:.4f}'.format(
                 iteration, total_train_iters, loss.data.item()))
             print('Time spent on back propagation: ', time.time() - t, ' s')
+            loss_history.append(loss.data.item())
             t = time.time()
             # keep track of loss for plotting and saving
         if (epoch + 1) % save_interval == 0:
