@@ -60,6 +60,21 @@ def crop_from_ones(image, mask, crop_size = 2560):
     
     mask_r = mask[:, (h - crop_size):]
     
+    if mask_c.sum() > mask_l.sum():
+        if mask_c.sum() > mask_r.sum():
+            mask = mask_c
+            image = image[(c_y - rand_size):(c_y + rand_size), (c_x - rand_size):(c_x + rand_size), :]
+        else:
+            mask = mask_r
+            image = image[:, (h - crop_size):, :]
+    else:
+        if mask_l.sum() > mask_r.sum():
+            mask = mask_l
+            image = image[:, 0:crop_size, :]
+        else:
+            mask = mask_r
+            image = image[:, (h - crop_size):, :]
+    
     return image, mask
 
 if __name__ == '__main__':
@@ -123,7 +138,7 @@ if __name__ == '__main__':
 #                name = 'sat%d_%d_%d.png' % (count, j, k)
 #                io.imsave('./data/my_data/images/' + name, image_hat)
 #                io.imsave('./data/my_data/groundtruth/' + name, mask_hat)
-        image_hat, mask_hat = crop_from_center(image, mask)
+        image_hat, mask_hat = crop_from_ones(image, mask)
         image_hat = transform.resize(image_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
         mask_hat = transform.resize(mask_hat, (out_size, out_size), mode = 'constant', anti_aliasing=True)
         name = 'sat%d.png' % count
