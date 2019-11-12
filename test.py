@@ -74,10 +74,10 @@ def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth 
         loss = Loss.final_loss(pred, mask)
         epoch_loss += loss.data.item() * batch_size
         
-        numer += utils.var_to_np(mask * pred).sum()
-        denom += utils.var_to_np(mask).sum() + utils.var_to_np(pred).sum()
+        numer += utils.var_to_np(mask * (pred > 0.5)).sum()
+        denom += utils.var_to_np(mask).sum() + utils.var_to_np(pred > 0.5).sum()
         
-    epoch_loss /= len(dataloader)
+    epoch_loss /= len(test_dataset)
     f1 = 2.0 * numer / denom
     return epoch_loss, f1
 
