@@ -59,7 +59,8 @@ def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth 
     # On our validation test dataset
     resize = True
     data_augment = False
-    test_dataset = utils.MyDataset(file, resize, data_augment, image_size)
+    rotate = False
+    test_dataset = utils.MyDataset(file, resize, data_augment, image_size, rotate)
     dataloader = utils_data.DataLoader(dataset = test_dataset, batch_size = batch_size, shuffle=False)
     epoch_loss = 0.0
     numer = 0.0

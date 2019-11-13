@@ -10,6 +10,7 @@ import os
 # import argparse
 import random
 import numpy as np
+import cv2
 
 from skimage import io, transform
 
@@ -62,6 +63,28 @@ def rotate_both(image, mask):
         mask = transform.rotate(mask, 90)
     return image, mask
 
+def random_rotate(image, mask, s):
+    L = image.shape[0]
+    C = np.array([L - 1, L - 1]) / 2.0
+    
+    
+    theta = np.random.random() * np.pi / 2.0
+    #s = L / np.sqrt(2) / np.cos(np.pi / 4 - theta)
+    #s = int(s)
+    #
+    #C_hat = np.array([s - 1, s - 1]) / 2.0
+    C_hat = np.array([s - 1, s - 1]) / 2.0
+    
+    cos = np.cos(theta)
+    sin = np.sin(theta)
+    
+    R = np.array([[cos, sin],[-sin, cos]])
+    M = np.column_stack((R, C - np.dot(R, C_hat)))
+    
+    image = cv2.warpAffine(image, M, (s, s), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
+    mask = cv2.warpAffine(mask, M, (s, s), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
+    return image, mask
+
 def flip_both(image, mask):
     if np.random.random() < 0.5:
         image = np.fliplr(image)
@@ -101,9 +124,10 @@ class TestDataset(utils_data.Dataset):
         return len(self.file_list) 
 
 class MyDataset(utils_data.Dataset):
-    def __init__(self, root, resize, data_augment, size):
+    def __init__(self, root, resize, data_augment, size, rotate):
         self.size = size
         self.root = root
+        self.rotate = rotate
         self.data_augment = data_augment
         mask_dir = root + '/groundtruth'
         self.resize = resize
@@ -120,6 +144,10 @@ class MyDataset(utils_data.Dataset):
         mask = io.imread(mask_name)
         
         image, mask = normalize_both(image, mask)
+        
+        if self.rotate:
+            self.resize = False
+            image, mask = random_rotate(image, mask, self.size)
         
         if self.data_augment:
             image, mask = rotate_both(image, mask)
@@ -185,12 +213,12 @@ class MyNewDataset(utils_data.Dataset):
 
 
 def get_data_loader(root, new_data = True, resize = True, data_augment = True,
-                    image_size = 384, batch_size=100):
+                    image_size = 384, batch_size=100, rotate = False):
     """Creates training data loader."""
     if new_data:
         train_dataset = MyNewDataset(root, resize, data_augment, image_size)
     else:
-        train_dataset = MyDataset(root, resize, data_augment, image_size)
+        train_dataset = MyDataset(root, resize, data_augment, image_size, rotate)
     return utils_data.DataLoader(dataset = train_dataset, batch_size = batch_size, shuffle=True)
 
 

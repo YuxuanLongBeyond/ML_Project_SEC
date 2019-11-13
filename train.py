@@ -37,13 +37,14 @@ if RUN_ON_GPU:
 
 
 if __name__ == '__main__':
-    new_data = True
+    new_data = False
     data_augment = True
+    rotate = True
     early_stop = False
 
     image_size = 384
     batch_size = 20
-    num_epochs = 100
+    num_epochs = 200
     save_interval = 1
     save_ckpt = 1
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
@@ -78,7 +79,7 @@ if __name__ == '__main__':
     Loss = utils.loss(smooth, lam)
 
 
-    dataloader = utils.get_data_loader(root, False, resize, data_augment, image_size, batch_size)
+    dataloader = utils.get_data_loader(root, False, resize, data_augment, image_size, batch_size, rotate)
     num_batch = len(dataloader)
     total_train_iters = num_epochs * num_batch
 
