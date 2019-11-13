@@ -41,12 +41,13 @@ if __name__ == '__main__':
     data_augment = True
     rotate = True
     early_stop = False
+    use_dlink = False
 
     image_size = 384
     batch_size = 20
-    num_epochs = 200
-    save_interval = 1
-    save_ckpt = 1
+    num_epochs = 400
+    save_interval = 10
+    save_ckpt = 10
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
     
     lr = 1e-4 # 2e-4
@@ -71,7 +72,7 @@ if __name__ == '__main__':
         os.makedirs('./parameters')    
     
     
-    net = utils.create_models()
+    net = utils.create_models(use_dlink)
     net.train()
     # net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
     # create optimizers
