@@ -65,7 +65,7 @@ class D_LinkNet(nn.Module):
     def __init__(self):
         
         # subclass nn.Module
-        super(LinkNet, self).__init__()
+        super(D_LinkNet, self).__init__()
         
         resnet = models.resnet34(pretrained = True)
 #        
