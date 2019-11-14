@@ -45,12 +45,13 @@ if __name__ == '__main__':
 
     image_size = 384
     batch_size = 20
-    num_epochs = 400
+    num_epochs = 800
     save_interval = 10
     save_ckpt = 10
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
     
     lr = 1e-4 # 2e-4
+    decay_rate = 0.85
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
@@ -140,6 +141,11 @@ if __name__ == '__main__':
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average loss is ', epoch_loss)
         
+        if (epoch + 1) % 50:
+            lr *= decay_rate
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = lr
+            
         
     torch.save(net.state_dict(), './parameters/weights')
     # save the loss history
