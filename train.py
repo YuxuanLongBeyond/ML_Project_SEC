@@ -50,7 +50,7 @@ if __name__ == '__main__':
     save_ckpt = 10
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
     
-    lr = 1e-4 # 2e-4
+    lr = 1e-4
     decay_rate = 0.85
     weight_decay = 1e-5
     smooth = 1.0
@@ -141,7 +141,7 @@ if __name__ == '__main__':
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average loss is ', epoch_loss)
         
-        if (epoch + 1) % 50:
+        if (epoch + 1) % 50 == 0:
             lr *= decay_rate
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
