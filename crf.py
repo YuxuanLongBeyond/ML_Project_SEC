@@ -16,8 +16,8 @@ from pydensecrf.utils import unary_from_labels, create_pairwise_bilateral, creat
 
 
 def dense_crf(img, output_probs):
-    h = test_mask.shape[0]
-    w = test_mask.shape[1]   
+    h = output_probs.shape[0]
+    w = output_probs.shape[1]   
     
     output_probs = np.expand_dims(output_probs, 0)
     output_probs = np.append(1 - output_probs, output_probs, axis=0)

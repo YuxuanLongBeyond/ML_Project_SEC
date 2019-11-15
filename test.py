@@ -12,6 +12,7 @@ import os
 import random
 import numpy as np
 import time
+import crf
 
 from skimage import io, transform
 
@@ -29,10 +30,10 @@ RUN_ON_GPU = torch.cuda.is_available()
 # return output masks over test data
 # test for single image
 
-def test_single_image(net, file, size = 384, resize = True):
+def test_single_image(net, file, size = 384, resize = True, use_crf = False):
     ##create single image tensor for test in each epoch
-    test_image_origin = io.imread(file)
-    test_image_origin = np.array(test_image_origin).astype(np.float32) / 255.0
+    uint_image = io.imread(file)
+    test_image_origin = np.array(uint_image).astype(np.float32) / 255.0
     if resize:
         test_image_origin = transform.resize(test_image_origin, (size, size), mode = 'constant', anti_aliasing=True)
     
@@ -47,6 +48,9 @@ def test_single_image(net, file, size = 384, resize = True):
     pred_test = net.forward(test_image)
     pred_np = utils.var_to_np(pred_test)[0][0]
     
+    if use_crf:
+        pred_np = crf.dense_crf(uint_image, pred_np)
+        
     new_mask = (pred_np >= 0.5)
 
     channel = test_image_origin[:, :, 0]
@@ -99,10 +103,11 @@ def test_batch_without_labels(net, file, batch_size = 5):
             count += 1
 
 if __name__ == '__main__':
-    test_dir = './data/main_data/test'
+    test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
     use_dlink = False
     
-    test_set_output = False
+    only_test_single = False
+    test_set_output = True
     test_with_labels = False
 
     net = utils.create_models(use_dlink)
@@ -115,6 +120,10 @@ if __name__ == '__main__':
     
     resize = False
     image_size = 384
+    
+    if only_test_single:
+        mask, image = test_single_image(net, test_image_name, size = 384, resize = False, use_crf = True)
+        io.imshow(image)
 
     if test_set_output:    
         file = './data/main_data/test_set_images/'
