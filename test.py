@@ -122,7 +122,7 @@ if __name__ == '__main__':
     image_size = 384
     
     if only_test_single:
-        mask, image = test_single_image(net, test_image_name, size = 384, resize = False, use_crf = True)
+        mask, image = test_single_image(net, test_image_name, size = 384, resize = False)
         io.imshow(image)
 
     if test_set_output:    
@@ -130,7 +130,7 @@ if __name__ == '__main__':
         for i in range(1, 51):
             t = 'test_' + str(i)
             name = file + t + '/' + t + '.png'
-            mask, image = test_single_image(net, name, size = 384, resize = False, use_crf = True)
+            mask, image = test_single_image(net, name, size = 384, resize = False)
             io.imsave('./output/' + 'test' + str(i) + '.png', mask)
             
     if test_with_labels:
