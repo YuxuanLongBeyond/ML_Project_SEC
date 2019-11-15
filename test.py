@@ -130,7 +130,7 @@ if __name__ == '__main__':
         for i in range(1, 51):
             t = 'test_' + str(i)
             name = file + t + '/' + t + '.png'
-            mask, image = test_single_image(net, name, size = 384, resize = False)
+            mask, image = test_single_image(net, name, size = 384, resize = False, use_crf = True)
             io.imsave('./output/' + 'test' + str(i) + '.png', mask)
             
     if test_with_labels:
