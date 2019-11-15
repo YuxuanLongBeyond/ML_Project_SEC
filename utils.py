@@ -93,6 +93,26 @@ def flip_both(image, mask):
         image = np.flipud(image)
         mask = np.flipud(mask)
     return image, mask
+
+
+def flip_rotate(image, flip_v, flip_h, rotate, inverse = False):
+    if inverse:
+        # flip_v, flip_h, rotate
+        if flip_v:
+            image = np.flipud(image)   
+        if flip_h:
+            image = np.fliplr(image)  
+        if rotate:
+            image = transform.rotate(image, -90)            
+    else:
+        # rotate, flip_h, flip_v
+        if rotate:
+            image = transform.rotate(image, 90)
+        if flip_h:
+            image = np.fliplr(image)
+        if flip_v:
+            image = np.flipud(image)
+    return image
        
 class TestDataset(utils_data.Dataset):
     def __init__(self, root):
