@@ -41,12 +41,12 @@ if __name__ == '__main__':
     data_augment = True
     rotate = True
     early_stop = False
-    use_dlink = False
+    use_dlink = True
     lr_control = False
 
     image_size = 384
     batch_size = 20
-    num_epochs = 800
+    num_epochs = 400
     save_interval = 10
     save_ckpt = 10
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
@@ -65,6 +65,7 @@ if __name__ == '__main__':
     else:
         root = old_root
         resize = True
+        early_stop = False
      
     if os.path.exists('./epoch_output'):
         shutil.rmtree('./epoch_output')
