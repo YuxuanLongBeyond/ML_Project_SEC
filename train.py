@@ -41,7 +41,7 @@ if __name__ == '__main__':
     data_augment = True
     rotate = True
     early_stop = False
-    use_dlink = True
+    model_choice = 2 # 0 for linknet, 1 Dlinknet, 2D_plusNet
     lr_control = False
 
     image_size = 384
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         os.makedirs('./parameters')    
     
     
-    net = utils.create_models(use_dlink)
+    net = utils.create_models(model_choice)
     net.train()
     # net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
     # create optimizers

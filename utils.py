@@ -242,10 +242,14 @@ def get_data_loader(root, new_data = True, resize = True, data_augment = True,
     return utils_data.DataLoader(dataset = train_dataset, batch_size = batch_size, shuffle=True)
 
 
-def create_models(use_dlink = False):
-    if use_dlink:
+def create_models(model_choice = 0):
+    if model_choice == 1:
         net = model.D_LinkNet()
-    else:    
+    elif model_choice == 0:
+        net = model.LinkNet()
+    elif model_choice == 2:
+        net = model.D_plus_LinkNet()
+    else:
         net = model.LinkNet()
 
     if RUN_ON_GPU:

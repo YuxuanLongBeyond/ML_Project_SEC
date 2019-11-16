@@ -35,9 +35,6 @@ class LinkNet(nn.Module):
         self.decoder3 = Decoder(128, 64)
         self.decoder4 = Decoder(64, 64)
         
-#        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
-#                    nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), nn.ReLU(), 
-#                    nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
         decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
                     nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), 
                     nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
@@ -86,9 +83,6 @@ class D_LinkNet(nn.Module):
         
         
         self.dblock = Dblock(512)
-#        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
-#                    nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), nn.ReLU(), 
-#                    nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
         decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
                     nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), 
                     nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
@@ -111,6 +105,62 @@ class D_LinkNet(nn.Module):
         out = self.decoder5(d4)
 
         return torch.sigmoid(out)
+    
+
+class D_plus_LinkNet(nn.Module):
+    # from Resnet34
+    def __init__(self):
+        
+        # subclass nn.Module
+        super(D_plus_LinkNet, self).__init__()
+        
+        resnet = models.resnet34(pretrained = True)
+#        
+#        for param in resnet.parameters():
+#            param.requires_grad = False
+
+        layer0 = [resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool]
+        self.layer0 = nn.Sequential(*layer0)
+        self.encoder1 = resnet.layer1
+        self.encoder2 = resnet.layer2
+        self.encoder3 = resnet.layer3
+        self.encoder4 = resnet.layer4
+
+        self.decoder1 = Decoder(512, 256)
+        self.decoder2 = Decoder(256, 128)
+        self.decoder3 = Decoder(128, 64)
+        self.decoder4 = Decoder(64, 64)
+        
+        
+        self.dblock0 = Dblock(512)
+        self.dblock1 = Dblock(256)
+        self.dblock2 = Dblock(128)
+        self.dblock3 = Dblock(64)
+        
+        
+        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
+                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), 
+                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
+        self.decoder5 = nn.Sequential(*decoder5)
+        
+        
+    def forward(self, x):
+        x0 = self.layer0(x)
+        x1 = self.encoder1(x0)
+        x2 = self.encoder2(x1)
+        x3 = self.encoder3(x2)
+        x4 = self.encoder4(x3)
+        
+        x4 = self.dblock0(x4)
+        
+        d1 = self.decoder1(x4) + self.dblock1(x3)
+        d2 = self.decoder2(d1) + self.dblock2(x2)
+        d3 = self.decoder3(d2) + self.dblock3(x1)
+        d4 = self.decoder4(d3)
+        out = self.decoder5(d4)
+
+        return torch.sigmoid(out)    
+    
 
 class Dblock(nn.Module):
     def __init__(self, channel):
@@ -129,6 +179,7 @@ class Dblock(nn.Module):
         d3 = self.dilate1(d2)
         out = x + d1 + d2 + d3
         return out
+        
         
     
 class Decoder(nn.Module):

@@ -150,7 +150,7 @@ def test_batch_without_labels(net, file, batch_size = 5):
 
 if __name__ == '__main__':
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
-    use_dlink = False
+    model_choice = 0
     ensemble = True
     
     only_test_single = True
@@ -158,7 +158,7 @@ if __name__ == '__main__':
     test_with_labels = False
     
 
-    net = utils.create_models(use_dlink)
+    net = utils.create_models(model_choice)
 #    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
     if RUN_ON_GPU:
         net.load_state_dict(torch.load('./parameters/weights'))
