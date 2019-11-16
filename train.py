@@ -42,6 +42,7 @@ if __name__ == '__main__':
     rotate = True
     early_stop = False
     use_dlink = False
+    lr_control = False
 
     image_size = 384
     batch_size = 20
@@ -141,7 +142,7 @@ if __name__ == '__main__':
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average loss is ', epoch_loss)
         
-        if (epoch + 1) % 50 == 0:
+        if (epoch + 1) % 50 == 0 and lr_control:
             lr *= decay_rate
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr

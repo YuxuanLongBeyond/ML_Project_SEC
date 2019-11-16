@@ -35,12 +35,12 @@ class LinkNet(nn.Module):
         self.decoder3 = Decoder(128, 64)
         self.decoder4 = Decoder(64, 64)
         
-        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
-                    nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), nn.ReLU(), 
-                    nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
 #        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
-#                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), 
-#                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
+#                    nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), nn.ReLU(), 
+#                    nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
+        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
+                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), 
+                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
         self.decoder5 = nn.Sequential(*decoder5)
         
         
@@ -86,12 +86,12 @@ class D_LinkNet(nn.Module):
         
         
         self.dblock = Dblock(512)
-        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
-                    nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), nn.ReLU(), 
-                    nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
 #        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
-#                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), 
-#                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
+#                    nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), nn.ReLU(), 
+#                    nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
+        decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
+                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), 
+                    nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
         self.decoder5 = nn.Sequential(*decoder5)
         
         
