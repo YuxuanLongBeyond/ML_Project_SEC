@@ -119,8 +119,9 @@ class D_plus_LinkNet(nn.Module):
 #        for param in resnet.parameters():
 #            param.requires_grad = False
 
-        layer0 = [resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool]
+        layer0 = [resnet.conv1, resnet.bn1, resnet.relu]
         self.layer0 = nn.Sequential(*layer0)
+        self.maxpool = resnet.maxpool
         self.encoder1 = resnet.layer1
         self.encoder2 = resnet.layer2
         self.encoder3 = resnet.layer3
@@ -132,10 +133,12 @@ class D_plus_LinkNet(nn.Module):
         self.decoder4 = Decoder(64, 64)
         
         
-        self.dblock0 = Dblock(512)
-        self.dblock1 = Dblock(256)
-        self.dblock2 = Dblock(128)
-        self.dblock3 = Dblock(64)
+        self.dblock = Dblock(512)
+        
+        self.conv1 = nn.Sequential(*[nn.Conv2d(256, 256, kernel_size = 3, padding = 1), nn.BatchNorm2d(256), nn.ReLU()])
+        self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, padding = 1), nn.BatchNorm2d(128), nn.ReLU()])
+        self.conv3 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, padding = 1), nn.BatchNorm2d(64), nn.ReLU()])
+        self.conv4 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 7, padding = 3), nn.BatchNorm2d(64), nn.ReLU()])
         
         
         decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
@@ -146,17 +149,18 @@ class D_plus_LinkNet(nn.Module):
         
     def forward(self, x):
         x0 = self.layer0(x)
-        x1 = self.encoder1(x0)
+        x0_pool = self.maxpool(x0)
+        x1 = self.encoder1(x0_pool)
         x2 = self.encoder2(x1)
         x3 = self.encoder3(x2)
         x4 = self.encoder4(x3)
         
-        x4 = self.dblock0(x4)
+        x4 = self.dblock(x4)
         
-        d1 = self.decoder1(x4) + self.dblock1(x3)
-        d2 = self.decoder2(d1) + self.dblock2(x2)
-        d3 = self.decoder3(d2) + self.dblock3(x1)
-        d4 = self.decoder4(d3)
+        d1 = self.decoder1(x4) + self.conv1(x3)
+        d2 = self.decoder2(d1) + self.conv2(x2)
+        d3 = self.decoder3(d2) + self.conv3(x1)
+        d4 = self.decoder4(d3) + self.conv4(x0)
         out = self.decoder5(d4)
 
         return torch.sigmoid(out)    
