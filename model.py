@@ -114,7 +114,7 @@ class D_plus_LinkNet(nn.Module):
         # subclass nn.Module
         super(D_plus_LinkNet, self).__init__()
         
-        resnet = models.resnet18(pretrained = True)
+        resnet = models.resnet17(pretrained = True)
 #        
 #        for param in resnet.parameters():
 #            param.requires_grad = False
