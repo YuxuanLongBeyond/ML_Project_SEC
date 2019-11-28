@@ -55,13 +55,14 @@ if __name__ == '__main__':
     save_ckpt = 20
     
     lr = 1e-4
-    decay_rate = 0.75
+    decay_rate = 0.85
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
     
-    gamma = 2.0
-    loss_type = 'focal'
+    gamma = 0.0
+    gamma_increment = 0.2
+    loss_type = 'bce'
     
 
     root = './data/main_data/training'
@@ -153,7 +154,7 @@ if __name__ == '__main__':
             with torch.no_grad():
                 torch.save(net.state_dict(), './parameters/weights')
               
-        if lr_decay and (epoch + 1) % 200: 
+        if lr_decay and (epoch + 1) % 100: 
             with torch.no_grad():
                 lr *= decay_rate
                 for param_group in optimizer.param_groups:
