@@ -225,7 +225,7 @@ class Loss(nn.Module):
     def focal_loss(self, pred, mask):
         pred = torch.clamp(pred, min = 1e-6, max = 0.999999)
         loss = - mask * torch.pow(1.0 - pred, self.gamma) * torch.log(pred) - (1.0 - mask) * torch.pow(pred, self.gamma) * torch.log(1.0 - pred)
-        return loss
+        return torch.mean(loss)
         
         
     def dice_loss(self, pred, mask):
