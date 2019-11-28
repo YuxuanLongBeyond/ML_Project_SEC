@@ -39,7 +39,8 @@ if RUN_ON_GPU:
 if __name__ == '__main__':
     data_augment = True
     rotate = True
-    early_stop = True
+    early_stop = False
+    lr_decay = True
     model_choice = 2 # 0 for linknet, 1 Dlinknet, 2D_plusNet
 
     image_size = 384
@@ -54,7 +55,7 @@ if __name__ == '__main__':
     save_ckpt = 20
     
     lr = 1e-4
-    decay_rate = 0.6
+    decay_rate = 0.75
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
@@ -151,6 +152,12 @@ if __name__ == '__main__':
         if not early_stop and (epoch + 1) % save_ckpt == 0:
             with torch.no_grad():
                 torch.save(net.state_dict(), './parameters/weights')
+              
+        if lr_decay and (epoch + 1) % 200: 
+            with torch.no_grad():
+                lr *= decay_rate
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = lr     
         
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average batch loss is ', epoch_loss)
