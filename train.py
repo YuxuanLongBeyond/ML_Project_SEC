@@ -45,19 +45,20 @@ if __name__ == '__main__':
     image_size = 384
     batch_size = 20
     num_epochs = 2000
-    save_test_image = 20
+    save_test_image = 10
     
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
     validate_root = './data/validate'
     
-    early_stop_tol = 3
+    early_stop_tol = 8
     save_ckpt = 20
     
     lr = 1e-4
-    decay_rate = 0.8
+    decay_rate = 0.6
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
+    
     gamma = 2.0
     loss_type = 'focal'
     
@@ -146,7 +147,10 @@ if __name__ == '__main__':
                     print('Reach the early stop tolerence...')
                     print('Break the update at ', epoch, 'th epoch')
                     break
-
+        
+        if not early_stop and (epoch + 1) % save_ckpt == 0:
+            with torch.no_grad():
+                torch.save(net.state_dict(), './parameters/weights')
         
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average batch loss is ', epoch_loss)
