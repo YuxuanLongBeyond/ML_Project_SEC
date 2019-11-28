@@ -107,7 +107,7 @@ def test_single_with_ensemble(net, file, size = 384, resize = True):
     
 def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth = 1.0, lam = 1.0):
     # On our validation test dataset
-    resize = True
+    resize = False
     data_augment = False
     rotate = False
     test_dataset = utils.MyDataset(file, resize, data_augment, image_size, rotate)
