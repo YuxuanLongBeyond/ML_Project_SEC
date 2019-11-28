@@ -55,14 +55,14 @@ if __name__ == '__main__':
     save_ckpt = 20
     
     lr = 1e-4
-    decay_rate = 0.85
+    decay_rate = 0.75
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
     
     gamma = 0.0
-    gamma_increment = 0.2
-    loss_type = 'bce'
+    gamma_increment = 0.1
+    loss_type = 'focal'
     
 
     root = './data/main_data/training'
@@ -154,11 +154,16 @@ if __name__ == '__main__':
             with torch.no_grad():
                 torch.save(net.state_dict(), './parameters/weights')
               
-        if lr_decay and (epoch + 1) % 100: 
+        if lr_decay and (epoch + 1) % 200: 
             with torch.no_grad():
                 lr *= decay_rate
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = lr     
+        
+        if loss_type == 'focal':
+            gamma += gamma_increment
+            with torch.no_grad():
+                Loss = utils.loss(smooth, lam, gamma, loss_type)
         
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average batch loss is ', epoch_loss)
