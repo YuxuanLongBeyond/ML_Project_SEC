@@ -44,13 +44,14 @@ if __name__ == '__main__':
 
     image_size = 384
     batch_size = 20
-    num_epochs = 400
+    num_epochs = 2000
     save_test_image = 10
-    save_ckpt = 10
+    
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
     validate_root = './data/validate'
     
-    early_stop_tol = 5
+    early_stop_tol = 3
+    save_ckpt = 20
     
     lr = 1e-4
     decay_rate = 0.8
