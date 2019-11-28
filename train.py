@@ -160,10 +160,10 @@ if __name__ == '__main__':
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = lr     
         
-        if loss_type == 'focal' and (epoch + 1) % 100 == 0:
-            gamma += gamma_increment
-            with torch.no_grad():
-                Loss = utils.loss(smooth, lam, gamma, loss_type)
+#        if loss_type == 'focal' and (epoch + 1) % 100 == 0:
+#            gamma += gamma_increment
+#            with torch.no_grad():
+#                Loss = utils.loss(smooth, lam, gamma, loss_type)
         
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average batch loss is ', epoch_loss)
