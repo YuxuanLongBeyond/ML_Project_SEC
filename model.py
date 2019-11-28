@@ -138,7 +138,7 @@ class D_plus_LinkNet(nn.Module):
         self.conv1 = nn.Sequential(*[nn.Conv2d(256, 256, kernel_size = 3, padding = 1), nn.BatchNorm2d(256), nn.ReLU()])
         self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, padding = 1), nn.BatchNorm2d(128), nn.ReLU()])
         self.conv3 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, padding = 1), nn.BatchNorm2d(64), nn.ReLU()])
-        self.conv4 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 7, padding = 3), nn.BatchNorm2d(64), nn.ReLU()])
+#        self.conv4 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 7, padding = 3), nn.BatchNorm2d(64), nn.ReLU()])
 #        self.conv4 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, padding = 1), nn.BatchNorm2d(64), nn.ReLU(), 
 #                                     nn.Conv2d(64, 64, kernel_size = 3, padding = 1), nn.BatchNorm2d(64), nn.ReLU()])
 #        
@@ -161,7 +161,7 @@ class D_plus_LinkNet(nn.Module):
         d1 = self.decoder1(x4) + self.conv1(x3)
         d2 = self.decoder2(d1) + self.conv2(x2)
         d3 = self.decoder3(d2) + self.conv3(x1)
-        d4 = self.decoder4(d3) + self.conv4(x0)
+        d4 = self.decoder4(d3) # + self.conv4(x0)
         out = self.decoder5(d4)
 
         return torch.sigmoid(out)    
