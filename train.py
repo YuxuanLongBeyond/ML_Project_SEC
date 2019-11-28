@@ -154,13 +154,13 @@ if __name__ == '__main__':
             with torch.no_grad():
                 torch.save(net.state_dict(), './parameters/weights')
               
-        if lr_decay and (epoch + 1) % 200: 
+        if lr_decay and (epoch + 1) % 200 == 0: 
             with torch.no_grad():
                 lr *= decay_rate
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = lr     
         
-        if loss_type == 'focal':
+        if loss_type == 'focal' and (epoch + 1) % 100 == 0:
             gamma += gamma_increment
             with torch.no_grad():
                 Loss = utils.loss(smooth, lam, gamma, loss_type)
