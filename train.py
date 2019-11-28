@@ -45,7 +45,7 @@ if __name__ == '__main__':
     image_size = 384
     batch_size = 20
     num_epochs = 2000
-    save_test_image = 10
+    save_test_image = 20
     
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
     validate_root = './data/validate'
@@ -58,6 +58,8 @@ if __name__ == '__main__':
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
+    gamma = 2.0
+    loss_type = 'focal'
     
 
     root = './data/main_data/training'
@@ -76,7 +78,7 @@ if __name__ == '__main__':
     # net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
     # create optimizers
     optimizer = optim.Adam(net.parameters(), lr = lr, weight_decay = weight_decay, amsgrad = True)
-    Loss = utils.loss(smooth, lam)
+    Loss = utils.loss(smooth, lam, gamma, loss_type)
 
 
     dataloader = utils.get_data_loader(root, False, resize, data_augment, image_size, batch_size, rotate)

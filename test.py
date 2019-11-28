@@ -115,7 +115,9 @@ def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth 
     epoch_loss = 0.0
     numer = 0.0
     denom = 0.0
-    Loss = utils.loss(smooth, lam)
+    gamma = 0.0
+    loss_type = 'bce'
+    Loss = utils.loss(smooth, lam, gamma, loss_type)
     for i, batch in enumerate(dataloader):
         print('Test on batch %d'%i)
         image = utils.np_to_var(batch['image'])

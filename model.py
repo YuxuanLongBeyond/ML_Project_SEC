@@ -207,11 +207,13 @@ class Decoder(nn.Module):
         return x        
     
 class Loss(nn.Module):
-    def __init__(self, smooth, lam):
+    def __init__(self, smooth, lam, gamma, loss_type = 'bce'):
         super(Loss, self).__init__()
 
         self.smooth = smooth
         self.lam = lam    
+        self.gamma = gamma
+        self.loss_type = loss_type
     
     def bce_loss(self, pred, mask):
 #        bce = - self.beta * mask * torch.log(pred) - (1.0 - self.beta) * (1.0 - mask) * torch.log(1.0 - pred)
@@ -219,9 +221,11 @@ class Loss(nn.Module):
 #        return torch.mean(bce)
         loss = nn.BCELoss()
         return loss(pred, mask)
-#    
-#    def focal_loss(self, pred, mask):
-#        
+    
+    def focal_loss(self, pred, mask):
+        pred = torch.clamp(pred, 1e-6, 0.999999)
+        loss = - mask * torch.pow(1.0 - pred, self.gamma) * torch.log(pred) - (1.0 - mask) * torch.pow(pred, self.gamma) * torch.log(1.0 - pred)
+        return loss
         
         
     def dice_loss(self, pred, mask):
@@ -232,11 +236,15 @@ class Loss(nn.Module):
         return torch.mean(loss_batch)
         
     def final_loss(self, pred, mask):
-        bce_loss = self.bce_loss(pred, mask)
+        loss = self.dice_loss(pred, mask) * self.lam
+        if self.loss_type == 'bce':
+            loss += self.bce_loss(pred, mask)
+        elif self.loss_type == 'focal':
+            loss += self.focal_loss(pred, mask)
+        else:
+            raise ValueError
         
-        dl_loss = self.dice_loss(pred, mask)
-        
-        return bce_loss + dl_loss * self.lam
+        return loss
         
         
         

@@ -261,5 +261,5 @@ def create_models(model_choice = 0):
     return net
 
 
-def loss(smooth, lam):
-    return model.Loss(smooth, lam)
+def loss(smooth, lam, gamma, loss_type):
+    return model.Loss(smooth, lam, gamma, loss_type)
