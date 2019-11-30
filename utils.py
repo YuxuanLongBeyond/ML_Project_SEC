@@ -63,6 +63,17 @@ def rotate_both(image, mask):
         mask = transform.rotate(mask, 90)
     return image, mask
 
+def random_color(image, delta_h = 10, delta_s = 0, delta_v = 30):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(image)
+    u1 = np.random.random() * 2 - 1
+    u2 = np.random.random() * 2 - 1
+    u3 = np.random.random() * 2 - 1
+    h = cv2.add(h, round(u1 * delta_h))
+    s = cv2.add(s, round(u2 * delta_s))
+    v = cv2.add(v, round(u3 * delta_v))
+    return cv2.cvtColor(cv2.merge((h, s, v)), cv2.COLOR_HSV2BGR)
+    
 def random_rotate(image, mask, s):
     L = image.shape[0]
     C = np.array([L - 1, L - 1]) / 2.0
@@ -144,11 +155,12 @@ class TestDataset(utils_data.Dataset):
         return len(self.file_list) 
 
 class MyDataset(utils_data.Dataset):
-    def __init__(self, root, resize, data_augment, size, rotate):
+    def __init__(self, root, resize, data_augment, size, rotate, change_color):
         self.size = size
         self.root = root
         self.rotate = rotate
         self.data_augment = data_augment
+        self.change_color = change_color
         mask_dir = root + '/groundtruth'
         self.resize = resize
 #        self.mask_file_list = [f for f in os.listdir(mask_dir) if os.path.isfile(os.path.join(mask_dir, f))]
@@ -162,6 +174,9 @@ class MyDataset(utils_data.Dataset):
         
         image = io.imread(img_name)
         mask = io.imread(mask_name)
+        
+        if self.change_color:
+            image = random_color(image)
         
         image, mask = normalize_both(image, mask)
         
@@ -233,12 +248,12 @@ class MyNewDataset(utils_data.Dataset):
 
 
 def get_data_loader(root, new_data = True, resize = True, data_augment = True,
-                    image_size = 384, batch_size=100, rotate = False):
+                    image_size = 384, batch_size=100, rotate = False, change_color = False):
     """Creates training data loader."""
     if new_data:
         train_dataset = MyNewDataset(root, resize, data_augment, image_size)
     else:
-        train_dataset = MyDataset(root, resize, data_augment, image_size, rotate)
+        train_dataset = MyDataset(root, resize, data_augment, image_size, rotate, change_color)
     return utils_data.DataLoader(dataset = train_dataset, batch_size = batch_size, shuffle=True)
 
 

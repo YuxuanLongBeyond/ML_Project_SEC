@@ -39,13 +39,14 @@ if RUN_ON_GPU:
 if __name__ == '__main__':
     data_augment = True
     rotate = True
+    change_color = True
     early_stop = False
-    lr_decay = True
+    lr_decay = False
     model_choice = 2 # 0 for linknet, 1 Dlinknet, 2D_plusNet
 
     image_size = 384
     batch_size = 20
-    num_epochs = 2000
+    num_epochs = 1500
     save_test_image = 10
     
     test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     
     gamma = 0.0
     gamma_increment = 0.1
-    loss_type = 'focal'
+    loss_type = 'bce'
     
 
     root = './data/main_data/training'
@@ -84,7 +85,7 @@ if __name__ == '__main__':
     Loss = utils.loss(smooth, lam, gamma, loss_type)
 
 
-    dataloader = utils.get_data_loader(root, False, resize, data_augment, image_size, batch_size, rotate)
+    dataloader = utils.get_data_loader(root, False, resize, data_augment, image_size, batch_size, rotate, change_color)
 #    validate_dataloader = utils.get_data_loader(validate_root, False, False, False, image_size, batch_size, False)
     num_batch = len(dataloader)
     total_train_iters = num_epochs * num_batch
