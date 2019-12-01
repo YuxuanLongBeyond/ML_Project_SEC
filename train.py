@@ -56,7 +56,7 @@ if __name__ == '__main__':
     save_ckpt = 20
     
     lr = 1e-4
-    decay_rate = 0.75
+    decay_rate = 0.6
     weight_decay = 1e-5
     smooth = 1.0
     lam = 1.0
@@ -155,7 +155,7 @@ if __name__ == '__main__':
             with torch.no_grad():
                 torch.save(net.state_dict(), './parameters/weights')
               
-        if lr_decay and (epoch + 1) % 200 == 0: 
+        if lr_decay and (epoch + 1) % 500 == 0: 
             with torch.no_grad():
                 lr *= decay_rate
                 for param_group in optimizer.param_groups:
