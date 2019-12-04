@@ -114,7 +114,7 @@ class D_plus_LinkNet(nn.Module):
         # subclass nn.Module
         super(D_plus_LinkNet, self).__init__()
         
-        resnet = models.resnet18(pretrained = True)
+        resnet = models.resnet34(pretrained = True)
 #        
 #        for param in resnet.parameters():
 #            param.requires_grad = False
@@ -135,9 +135,9 @@ class D_plus_LinkNet(nn.Module):
         
         self.dblock = Dblock(512)
         
-        self.conv1 = nn.Sequential(*[nn.Conv2d(256, 256, kernel_size = 3, padding = 1), nn.BatchNorm2d(256), nn.ReLU()])
-        self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, padding = 1), nn.BatchNorm2d(128), nn.ReLU()])
-        self.conv3 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, padding = 1), nn.BatchNorm2d(64), nn.ReLU()])
+        self.conv1 = nn.Sequential(*[nn.Conv2d(256, 256, kernel_size = 3, padding = 1)])
+        self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, padding = 1)])
+        self.conv3 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, padding = 1)])
         
 #        self.conv1 = nn.Sequential(*[nn.Conv2d(256, 256, kernel_size = 3, dilation = 2, padding = 2), nn.BatchNorm2d(256), nn.ReLU()])
 #        self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, dilation = 2, padding = 2), nn.BatchNorm2d(128), nn.ReLU()])
