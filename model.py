@@ -135,9 +135,9 @@ class D_plus_LinkNet(nn.Module):
         
         self.dblock = Dblock(512)
         
-        self.conv1 = nn.Sequential(*[nn.Conv2d(256, 256, kernel_size = 3, padding = 1)])
-        self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, padding = 1)])
-        self.conv3 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, padding = 1)])
+        self.conv1 = nn.Sequential(*[nn.Conv2d(256, 256, kernel_size = 3, padding = 1), nn.BatchNorm2d(256), nn.ReLU()])
+        self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, padding = 1), nn.BatchNorm2d(128), nn.ReLU()])
+        self.conv3 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, padding = 1), nn.BatchNorm2d(64), nn.ReLU()])
         
 #        self.conv1 = nn.Sequential(*[nn.Conv2d(256, 256, kernel_size = 3, dilation = 2, padding = 2), nn.BatchNorm2d(256), nn.ReLU()])
 #        self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, dilation = 2, padding = 2), nn.BatchNorm2d(128), nn.ReLU()])
@@ -199,8 +199,7 @@ class Decoder(nn.Module):
         
         tem = c_in // 4
         layer1 = [nn.Conv2d(c_in, tem, kernel_size = 1), nn.BatchNorm2d(tem), nn.ReLU()]
-        layer2 = [nn.ConvTranspose2d(tem, tem, kernel_size = 3, stride = 2, padding = 1, output_padding = 1),
-                       nn.BatchNorm2d(tem), nn.ReLU()]
+        layer2 = [nn.ConvTranspose2d(tem, tem, kernel_size = 3, stride = 2, padding = 1, output_padding = 1), nn.BatchNorm2d(tem), nn.ReLU()]
         layer3 = [nn.ConvTranspose2d(tem, c_out, kernel_size = 1), nn.BatchNorm2d(c_out), nn.ReLU()]
         self.layer1 = nn.Sequential(*layer1)
         self.layer2 = nn.Sequential(*layer2)
