@@ -63,7 +63,7 @@ def rotate_both(image, mask):
         mask = transform.rotate(mask, 90)
     return image, mask
 
-def random_color(image, delta_h = 10, delta_s = 0, delta_v = 30):
+def random_color(image, delta_h = 5, delta_s = 5, delta_v = 15):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     h, s, v = cv2.split(image)
     u1 = np.random.random() * 2 - 1
