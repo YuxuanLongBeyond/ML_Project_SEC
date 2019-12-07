@@ -13,12 +13,11 @@ import random
 import numpy as np
 import time
 
-from skimage import io, transform
 
 import torch
 import torch.nn as nn
-
-
+import cv2
+from skimage import io
 import torch.utils.data as utils_data
 
 import utils
@@ -33,9 +32,8 @@ def test_single_image(net, file, size = 384, resize = True):
     uint_image = io.imread(file)
     test_image_origin = np.array(uint_image).astype(np.float32) / 255.0
     if resize:
-        test_image_origin = transform.resize(test_image_origin, (size, size), mode = 'constant', anti_aliasing=True)
-    
-        test_image = utils.image_resize(test_image_origin, resize, size)
+        test_image_origin = cv2.resize(test_image_origin, (size, size), interpolation = cv2.INTER_LINEAR)
+        test_image = np.moveaxis(test_image_origin, 2, 0).astype(np.float32) # tensor format  
     else:
         test_image = test_image_origin
         test_image = np.moveaxis(test_image, 2, 0).astype(np.float32) # tensor format  
@@ -62,7 +60,7 @@ def test_single_with_ensemble(net, file, size = 384, resize = True):
 
         
     if resize:
-        test_image = transform.resize(test_image_origin, (size, size), mode = 'constant', anti_aliasing=True)
+        test_image = cv2.resize(test_image_origin, (size, size), interpolation = cv2.INTER_LINEAR)
     else:
         test_image = test_image_origin
 
@@ -164,7 +162,7 @@ if __name__ == '__main__':
         else:
             mask, image = test_single_image(net, test_image_name, size = 384, resize = False)
         io.imshow(image)
-        
+        io.imsave('test.png', image)
         
 
     if test_set_output:    

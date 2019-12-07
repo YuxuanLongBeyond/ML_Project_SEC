@@ -10,7 +10,6 @@ import os
 import numpy as np
 import cv2
 
-from skimage import io, transform
 
 import torch
 from torch.autograd import Variable
@@ -43,22 +42,22 @@ def normalize_both(image, mask):
     
 def image_resize(image, resize, size):
     if resize:
-        image = transform.resize(image, (size, size), mode = 'constant', anti_aliasing=True)
+        image = cv2.resize(image, (size, size), interpolation = cv2.INTER_LINEAR)
     image = np.moveaxis(image, 2, 0).astype(np.float32) # tensor format
     return image
 
 def mask_resize(mask, resize, size):
     
     if resize:
-        mask = transform.resize(mask, (size, size), mode = 'constant', anti_aliasing=True)
+        mask = cv2.resize(mask, (size, size), interpolation = cv2.INTER_LINEAR)
     mask = np.array(mask >= 0.5).astype(np.float32) # test here
     mask = np.expand_dims(mask, axis = 0)
     return mask
 
 def rotate_both(image, mask):
     if np.random.random() < 0.5:
-        image = transform.rotate(image, 90)
-        mask = transform.rotate(mask, 90)
+        image = np.rot90(image, 1, (0, 1))
+        mask = np.rot90(mask, 1)
     return image, mask
 
 def random_color(image, delta_h = 5, delta_s = 5, delta_v = 15):
@@ -87,8 +86,8 @@ def random_rotate(image, mask, s):
     R = np.array([[cos, sin],[-sin, cos]])
     M = np.column_stack((R, C - np.dot(R, C_hat)))
     
-    image = cv2.warpAffine(image, M, (s, s), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
-    mask = cv2.warpAffine(mask, M, (s, s), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
+    image = cv2.warpAffine(image, M, (s, s), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
+    mask = cv2.warpAffine(mask, M, (s, s), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
     return image, mask
 
 def flip_both(image, mask):
@@ -109,11 +108,11 @@ def flip_rotate(image, flip_v, flip_h, rotate, inverse = False):
         if flip_h:
             image = np.fliplr(image)  
         if rotate:
-            image = transform.rotate(image, -90)            
+            image = np.rot90(image, 3, (0, 1))          
     else:
         # rotate, flip_h, flip_v
         if rotate:
-            image = transform.rotate(image, 90)
+            image = np.rot90(image, 1, (0, 1))  
         if flip_h:
             image = np.fliplr(image)
         if flip_v:
@@ -130,7 +129,6 @@ class MyDataset(utils_data.Dataset):
         self.change_color = change_color
         mask_dir = root + '/groundtruth'
         self.resize = resize
-#        self.mask_file_list = [f for f in os.listdir(mask_dir) if os.path.isfile(os.path.join(mask_dir, f))]
         self.mask_file_list = [f for f in os.listdir(mask_dir) if 'sat' in f and 'png' in f]
 #        random.shuffle(self.mask_file_list)
 
@@ -139,8 +137,8 @@ class MyDataset(utils_data.Dataset):
         img_name = self.root + '/images/' + file_name+'.png'
         mask_name = self.root + '/groundtruth/' + file_name+'.png'
         
-        image = io.imread(img_name)
-        mask = io.imread(mask_name)
+        image = cv2.imread(img_name)
+        mask = cv2.imread(mask_name)
         
         if self.change_color:
             image = random_color(image)

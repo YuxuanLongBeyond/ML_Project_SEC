@@ -11,10 +11,10 @@ import shutil
 import numpy as np
 import random
 import time
-from skimage import io
 import torch
 import torch.optim as optim
-
+import cv2
+from skimage import io
 import utils
 import test
 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
         if (epoch + 1) % save_test_image == 0:
             with torch.no_grad():
                 _, test_image = test.test_single_image(net, test_image_name, resize = False)  
-            io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
+            io.imwrite('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
         
         if early_stop and (epoch + 1) % save_ckpt == 0:
             with torch.no_grad():
@@ -175,8 +175,6 @@ if __name__ == '__main__':
         
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average batch loss is ', epoch_loss)
-
-        
 #    torch.save(net.state_dict(), './parameters/weights')
         
     # save the loss history
