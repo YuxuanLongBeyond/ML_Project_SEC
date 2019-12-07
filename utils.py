@@ -7,8 +7,6 @@ Created on Sun Oct 13 10:06:57 2019
 """
 
 import os
-# import argparse
-import random
 import numpy as np
 import cv2
 
@@ -80,10 +78,7 @@ def random_rotate(image, mask, s):
     
     
     theta = np.random.random() * np.pi / 2.0
-    #s = L / np.sqrt(2) / np.cos(np.pi / 4 - theta)
-    #s = int(s)
-    #
-    #C_hat = np.array([s - 1, s - 1]) / 2.0
+
     C_hat = np.array([s - 1, s - 1]) / 2.0
     
     cos = np.cos(theta)
@@ -125,34 +120,6 @@ def flip_rotate(image, flip_v, flip_h, rotate, inverse = False):
             image = np.flipud(image)
     return image
        
-class TestDataset(utils_data.Dataset):
-    def __init__(self, root):
-        self.root = root
-        
-        self.file_list = []
-        for f in os.listdir(root):
-            name = os.path.join(root, f)
-            if not os.path.isfile(name):
-                
-                self.file_list.append(os.path.join(name, f) + '.png')
-        self.file_list.sort()
-#        self.file_list = [f for f in os.listdir(root) if os.path.isfile(os.path.join(root, f))]
-#        random.shuffle(self.mask_file_list)
-        
-
-    def __getitem__(self, index):
-        img_name = os.path.join(self.file_list[index])
-        
-        image = io.imread(img_name)
-        image = np.array(image).astype(np.float32) / 255.0
-        image = image_resize(image, False, 0)
-        
-        sample = {'image': image}
-
-        return sample
-  
-    def __len__(self):
-        return len(self.file_list) 
 
 class MyDataset(utils_data.Dataset):
     def __init__(self, root, resize, data_augment, size, rotate, change_color):
@@ -199,61 +166,12 @@ class MyDataset(utils_data.Dataset):
     def __len__(self):
         return len(self.mask_file_list)
     
-class MyNewDataset(utils_data.Dataset):
-    def __init__(self, root, resize, data_augment, size):
-        self.size = size
-        self.root = root
-        self.resize = resize
-        self.data_augment = data_augment
-        image_file_list = []
-        label_file_list = []
-        for f in os.listdir(root):
-            if os.path.isfile(os.path.join(root, f)):
-                if 'image' in f:
-                    image_file_list.append(f)
-                if 'labels' in f:
-                    label_file_list.append(f)
-        image_file_list.sort()
-        label_file_list.sort()
-        file_num = len(image_file_list)
-        self.file_num = file_num
-        file_list = [[image_file_list[i], label_file_list[i]] for i in range(file_num)]
-        self.file_list = file_list
-#        random.shuffle(self.file_list)
-
-    def __getitem__(self, index):
-        img_name = self.root + '/' + self.file_list[index][0]
-        mask_name = self.root + '/' + self.file_list[index][1]
-        
-        image = io.imread(img_name)
-        mask = io.imread(mask_name)
-        mask = (mask[:, :, 0] == 0).astype(np.float32)
-        image = np.array(image).astype(np.float32) / 255.0
-        
-        if self.data_augment:
-#            image, mask = crop_both(image, mask)
-            image, mask = rotate_both(image, mask)
-            image, mask = flip_both(image, mask)
-        
-        # resize and convert to tensor
-        image = image_resize(image, self.resize, self.size)
-        mask = mask_resize(mask, self.resize, self.size)
-        
-        sample = {'image': image, 'mask': mask}
-
-        return sample
-  
-    def __len__(self):
-        return self.file_num
 
 
-def get_data_loader(root, new_data = True, resize = True, data_augment = True,
+def get_data_loader(root, resize = True, data_augment = True,
                     image_size = 384, batch_size=100, rotate = False, change_color = False):
     """Creates training data loader."""
-    if new_data:
-        train_dataset = MyNewDataset(root, resize, data_augment, image_size)
-    else:
-        train_dataset = MyDataset(root, resize, data_augment, image_size, rotate, change_color)
+    train_dataset = MyDataset(root, resize, data_augment, image_size, rotate, change_color)
     return utils_data.DataLoader(dataset = train_dataset, batch_size = batch_size, shuffle=True)
 
 

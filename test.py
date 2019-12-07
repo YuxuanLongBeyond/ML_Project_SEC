@@ -12,7 +12,6 @@ import os
 import random
 import numpy as np
 import time
-import crf
 
 from skimage import io, transform
 
@@ -26,11 +25,9 @@ import utils
 
 RUN_ON_GPU = torch.cuda.is_available()
 #####test####
-# return loss over test data, if labels provided
-# return output masks over test data
-# test for single image
 
-def test_single_image(net, file, size = 384, resize = True, use_crf = False):
+
+def test_single_image(net, file, size = 384, resize = True):
     ##create single image tensor for test in each epoch
     uint_image = io.imread(file)
     test_image_origin = np.array(uint_image).astype(np.float32) / 255.0
@@ -48,8 +45,6 @@ def test_single_image(net, file, size = 384, resize = True, use_crf = False):
     pred_test = net.forward(test_image)
     pred_np = utils.var_to_np(pred_test)[0][0]
     
-    if use_crf:
-        pred_np = crf.dense_crf(uint_image, pred_np)
         
     new_mask = (pred_np >= 0.5)
 
@@ -134,24 +129,9 @@ def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth 
     f1 = 2.0 * numer / denom
     return epoch_loss, f1
 
-def test_batch_without_labels(net, file, batch_size = 5):
-    # On the real test dataset
-    test_dataset = utils.TestDataset(file)
-    dataloader = utils_data.DataLoader(dataset = test_dataset, batch_size = batch_size, shuffle=False)
-    count = 1
-    for batch in dataloader:
-        image = utils.np_to_var(batch['image'])
-        pred = net.forward(image)   
-        
-        pred = utils.var_to_np(pred)
-        for i in range(pred.shape[0]):
-            mask = (pred[i][0] > 0.5) * 255
-            mask = mask.astype(np.uint8)
-            io.imsave('./output/' + 'test' + str(count) + '.png', mask)
-            count += 1
 
 if __name__ == '__main__':
-    test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
+    test_image_name = './data/test_set_images/test_26/test_26.png'
     model_choice = 0
     ensemble = True
     
@@ -177,7 +157,7 @@ if __name__ == '__main__':
         io.imshow(image)
 
     if test_set_output:    
-        file = './data/main_data/test_set_images/'
+        file = './data/test_set_images/'
         for i in range(1, 51):
             t = 'test_' + str(i)
             name = file + t + '/' + t + '.png'
@@ -188,6 +168,6 @@ if __name__ == '__main__':
             io.imsave('./output/' + 'test' + str(i) + '.png', mask)
             
     if test_with_labels:
-        file = './data/main_data/training'
+        file = './data/training'
         loss, f1 = test_batch_with_labels(net, file, batch_size = 1, image_size = 384, smooth = 1.0, lam = 1.0)
         

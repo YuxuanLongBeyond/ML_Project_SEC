@@ -12,16 +12,13 @@ from torchvision import models
 
 
 class LinkNet(nn.Module):
-    # from Resnet34
     def __init__(self):
         
-        # subclass nn.Module
+        # subclass of nn.Module
         super(LinkNet, self).__init__()
         
         resnet = models.resnet34(pretrained = True)
-#        
-#        for param in resnet.parameters():
-#            param.requires_grad = False
+
 
         layer0 = [resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool]
         self.layer0 = nn.Sequential(*layer0)
@@ -139,15 +136,7 @@ class D_plus_LinkNet(nn.Module):
         self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, padding = 1), nn.BatchNorm2d(128), nn.ReLU()])
         self.conv3 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, padding = 1), nn.BatchNorm2d(64), nn.ReLU()])
         
-#        self.conv1 = nn.Sequential(*[nn.Conv2d(256, 256, kernel_size = 3, dilation = 2, padding = 2), nn.BatchNorm2d(256), nn.ReLU()])
-#        self.conv2 = nn.Sequential(*[nn.Conv2d(128, 128, kernel_size = 3, dilation = 2, padding = 2), nn.BatchNorm2d(128), nn.ReLU()])
-#        self.conv3 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, dilation = 2, padding = 2), nn.BatchNorm2d(64), nn.ReLU()])
         
-        
-#        self.conv4 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 7, padding = 3), nn.BatchNorm2d(64), nn.ReLU()])
-#        self.conv4 = nn.Sequential(*[nn.Conv2d(64, 64, kernel_size = 3, padding = 1), nn.BatchNorm2d(64), nn.ReLU(), 
-#                                     nn.Conv2d(64, 64, kernel_size = 3, padding = 1), nn.BatchNorm2d(64), nn.ReLU()])
-#        
         decoder5 = [nn.ConvTranspose2d(64, 32, kernel_size = 4, stride = 2, padding = 1), 
                     nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 32, kernel_size = 3, padding = 1), 
                     nn.BatchNorm2d(32), nn.ReLU(), nn.Conv2d(32, 1, kernel_size = 3, padding = 1)]
@@ -222,7 +211,6 @@ class Loss(nn.Module):
     
     def bce_loss(self, pred, mask):
 #        bce = - self.beta * mask * torch.log(pred) - (1.0 - self.beta) * (1.0 - mask) * torch.log(1.0 - pred)
-        
 #        return torch.mean(bce)
         loss = nn.BCELoss()
         return loss(pred, mask)

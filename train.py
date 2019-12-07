@@ -6,12 +6,8 @@ Created on Thu Sep 26 20:07:35 2019
 @author: YuxuanLong
 """
 
-# Loss, train
-
-
 import os
 import shutil
-# import argparse
 import numpy as np
 import random
 import time
@@ -25,7 +21,14 @@ import test
 from torch import autograd
 
 
-# Run on GPU if CUDA is available.
+"""
+This script is for training the neural network.
+"""
+
+
+
+
+# Run on GPU if CUDA is available
 RUN_ON_GPU = torch.cuda.is_available()
 
 SEED = 2019
@@ -42,14 +45,14 @@ if __name__ == '__main__':
     change_color = False
     early_stop = False
     lr_decay = False
-    model_choice = 2 # 0 for linknet, 1 Dlinknet, 2D_plusNet
+    model_choice = 2 # 0 for linknet, 1 Dlinknet, 2 for D_plusNet
 
     image_size = 384
     batch_size = 20
     num_epochs = 1500
     save_test_image = 10
     
-    test_image_name = './data/main_data/test_set_images/test_26/test_26.png'
+    test_image_name = './data/test_set_images/test_26/test_26.png'
     validate_root = './data/validate'
     
     early_stop_tol = 8
@@ -57,16 +60,23 @@ if __name__ == '__main__':
     
     lr = 1e-4
     decay_rate = 0.6
+    decay_period = 500
+    
+    
     weight_decay = 1e-5
+    
+    
+    loss_type = 'bce'    
+    
+    # BCE loss
     smooth = 1.0
     lam = 1.0
     
-    gamma = 0.0
-    gamma_increment = 0.1
-    loss_type = 'bce'
+    # Focal loss
+    gamma = 2.0
     
 
-    root = './data/main_data/training'
+    root = './data/training'
     resize = True
 
     if os.path.exists('./epoch_output'):
@@ -78,15 +88,17 @@ if __name__ == '__main__':
     
     
     net = utils.create_models(model_choice)
-    net.train()
+    net.train() # in train mode
+    
     # net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
+    
     # create optimizers
     optimizer = optim.Adam(net.parameters(), lr = lr, weight_decay = weight_decay, amsgrad = True)
     Loss = utils.loss(smooth, lam, gamma, loss_type)
 
 
-    dataloader = utils.get_data_loader(root, False, resize, data_augment, image_size, batch_size, rotate, change_color)
-#    validate_dataloader = utils.get_data_loader(validate_root, False, False, False, image_size, batch_size, False)
+    dataloader = utils.get_data_loader(root, resize, data_augment, image_size, batch_size, rotate, change_color)
+
     num_batch = len(dataloader)
     total_train_iters = num_epochs * num_batch
 
@@ -125,8 +137,7 @@ if __name__ == '__main__':
             loss_history.append(loss.data.item())
             t = time.time()
             
-        # keep track of loss for plotting and saving
-            
+        # save the test image for visualizing the training outcome
         if (epoch + 1) % save_test_image == 0:
             with torch.no_grad():
                 _, test_image = test.test_single_image(net, test_image_name, resize = False)  
@@ -155,24 +166,19 @@ if __name__ == '__main__':
             with torch.no_grad():
                 torch.save(net.state_dict(), './parameters/weights')
               
-        if lr_decay and (epoch + 1) % 500 == 0: 
+        if lr_decay and (epoch + 1) % decay_period == 0: 
             with torch.no_grad():
                 lr *= decay_rate
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = lr     
         
-#        if loss_type == 'focal' and (epoch + 1) % 100 == 0:
-#            gamma += gamma_increment
-#            with torch.no_grad():
-#                Loss = utils.loss(smooth, lam, gamma, loss_type)
         
         epoch_loss /= num_batch
         print('In the epoch ', epoch, ', the average batch loss is ', epoch_loss)
 
-
-            
         
 #    torch.save(net.state_dict(), './parameters/weights')
+        
     # save the loss history
     with open('loss.txt', 'wt') as file:
         file.write('\n'.join(['{}'.format(loss) for loss in loss_history]))
