@@ -22,6 +22,7 @@ import torch.nn as nn
 import torch.utils.data as utils_data
 
 import utils
+import mask_to_submission
 
 RUN_ON_GPU = torch.cuda.is_available()
 #####test####
@@ -132,13 +133,14 @@ def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth 
 
 if __name__ == '__main__':
     test_image_name = './data/test_set_images/test_26/test_26.png'
-    model_choice = 0
-    ensemble = True
+    model_choice = 2
+    ensemble = False
     
     only_test_single = True
     test_set_output = False
     test_with_labels = False
     
+    num_test = 50
 
     net = utils.create_models(model_choice)
 #    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
@@ -151,14 +153,23 @@ if __name__ == '__main__':
     resize = False
     image_size = 384
     
+    
+    if test_with_labels:
+        file = './data/training'
+        loss, f1 = test_batch_with_labels(net, file, batch_size = 1, image_size = 384, smooth = 1.0, lam = 1.0)    
+    
     if only_test_single:
-#        mask, image = test_single_image(net, test_image_name, size = 384, resize = False)
-        mask, image = test_single_with_ensemble(net, test_image_name, size = 384, resize = False)
+        if ensemble:
+            mask, image = test_single_with_ensemble(net, test_image_name, size = 384, resize = False)
+        else:
+            mask, image = test_single_image(net, test_image_name, size = 384, resize = False)
         io.imshow(image)
+        
+        
 
     if test_set_output:    
         file = './data/test_set_images/'
-        for i in range(1, 51):
+        for i in range(1, num_test + 1):
             t = 'test_' + str(i)
             name = file + t + '/' + t + '.png'
             if ensemble:
@@ -167,7 +178,15 @@ if __name__ == '__main__':
                 mask, image = test_single_image(net, name, size = 384, resize = False)
             io.imsave('./output/' + 'test' + str(i) + '.png', mask)
             
-    if test_with_labels:
-        file = './data/training'
-        loss, f1 = test_batch_with_labels(net, file, batch_size = 1, image_size = 384, smooth = 1.0, lam = 1.0)
+
+        submission_filename = 'submission.csv'
+            
+        image_filenames = []
+        for i in range(1, num_test + 1):
+            image_filename = 'output/test' + str(i) + '.png'
+            print(image_filename)
+            image_filenames.append(image_filename)
+        mask_to_submission.masks_to_submission(submission_filename, *image_filenames)        
+        
+
         
