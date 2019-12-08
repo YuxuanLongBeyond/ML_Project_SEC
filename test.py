@@ -17,7 +17,7 @@ import time
 import torch
 import torch.nn as nn
 import cv2
-from skimage import io
+from skimage import io, transform
 import torch.utils.data as utils_data
 
 import utils
@@ -32,7 +32,7 @@ def test_single_image(net, file, size = 384, resize = True):
     uint_image = io.imread(file)
     test_image_origin = np.array(uint_image).astype(np.float32) / 255.0
     if resize:
-        test_image_origin = cv2.resize(test_image_origin, (size, size), interpolation = cv2.INTER_LINEAR)
+        test_image_origin = transform.resize(test_image_origin, (size, size), mode = 'constant', anti_aliasing = True)
         test_image = np.moveaxis(test_image_origin, 2, 0).astype(np.float32) # tensor format  
     else:
         test_image = test_image_origin
@@ -60,7 +60,7 @@ def test_single_with_ensemble(net, file, size = 384, resize = True):
 
         
     if resize:
-        test_image = cv2.resize(test_image_origin, (size, size), interpolation = cv2.INTER_LINEAR)
+        test_image = transform.resize(test_image_origin, (size, size), mode = 'constant', anti_aliasing = True)
     else:
         test_image = test_image_origin
 

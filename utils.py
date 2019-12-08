@@ -10,7 +10,7 @@ import os
 import numpy as np
 import cv2
 
-
+from skimage import io, transform
 import torch
 from torch.autograd import Variable
 import torchvision.utils
@@ -42,14 +42,14 @@ def normalize_both(image, mask):
     
 def image_resize(image, resize, size):
     if resize:
-        image = cv2.resize(image, (size, size), interpolation = cv2.INTER_LINEAR)
+        image = transform.resize(image, (size, size), mode = 'constant', anti_aliasing = True)
     image = np.moveaxis(image, 2, 0).astype(np.float32) # tensor format
     return image
 
 def mask_resize(mask, resize, size):
     
     if resize:
-        mask = cv2.resize(mask, (size, size), interpolation = cv2.INTER_LINEAR)
+        mask = transform.resize(mask, (size, size), mode = 'constant', anti_aliasing = True)
     mask = np.array(mask >= 0.5).astype(np.float32) # test here
     mask = np.expand_dims(mask, axis = 0)
     return mask
@@ -86,8 +86,8 @@ def random_rotate(image, mask, s):
     R = np.array([[cos, sin],[-sin, cos]])
     M = np.column_stack((R, C - np.dot(R, C_hat)))
     
-    image = cv2.warpAffine(image, M, (s, s), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
-    mask = cv2.warpAffine(mask, M, (s, s), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
+    image = cv2.warpAffine(image, M, (s, s), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
+    mask = cv2.warpAffine(mask, M, (s, s), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
     return image, mask
 
 def flip_both(image, mask):
@@ -137,8 +137,8 @@ class MyDataset(utils_data.Dataset):
         img_name = self.root + '/images/' + file_name+'.png'
         mask_name = self.root + '/groundtruth/' + file_name+'.png'
         
-        image = cv2.imread(img_name)
-        mask = cv2.imread(mask_name)
+        image = io.imread(img_name)
+        mask = io.imread(mask_name)
         
         if self.change_color:
             image = random_color(image)
