@@ -8,30 +8,11 @@ Created on Wed Nov 13 20:54:00 2019
 import numpy as np
 import cv2
 from skimage import io, transform
+from utils import random_color
 
 ####### Visualizing the geometric and color transformation
+### Mainly for test
 
-def random_color(image, delta_h = 0, delta_s = 0, delta_v = 0):
-    
-    tem = image[:, :, 2]
-    image[:, :, 2] = image[:, :, 0]
-    image[:, :, 0] = tem
-    
-    
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    h, s, v = cv2.split(image)
-    u1 = np.random.random() * 2 - 1
-    u2 = np.random.random() * 2 - 1
-    u3 = np.random.random() * 2 - 1
-    h = cv2.add(h, round(u1 * delta_h))
-    s = cv2.add(s, round(u2 * delta_s))
-    v = cv2.add(v, round(u3 * delta_v))
-    out = cv2.cvtColor(cv2.merge((h, s, v)), cv2.COLOR_HSV2BGR)
-    
-    tem = out[:, :, 2]
-    out[:, :, 2] = out[:, :, 0]
-    out[:, :, 0] = tem
-    return out
     
 if __name__ == '__main__':
     A = io.imread('./data/training/images/satImage_001.png')

@@ -141,7 +141,7 @@ if __name__ == '__main__':
         if (epoch + 1) % save_test_image == 0:
             with torch.no_grad():
                 _, test_image = test.test_single_image(net, test_image_name, resize = False)  
-            io.imwrite('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
+            io.imsave('./epoch_output/test_epoch' + str(epoch) + '.png', test_image)
         
         if early_stop and (epoch + 1) % save_ckpt == 0:
             with torch.no_grad():
