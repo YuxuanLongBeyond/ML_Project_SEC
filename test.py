@@ -104,7 +104,8 @@ def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth 
     resize = False
     data_augment = False
     rotate = False
-    test_dataset = utils.MyDataset(file, resize, data_augment, image_size, rotate)
+    change_color = False
+    test_dataset = utils.MyDataset(file, resize, data_augment, image_size, rotate, change_color)
     dataloader = utils_data.DataLoader(dataset = test_dataset, batch_size = batch_size, shuffle=False)
     epoch_loss = 0.0
     numer = 0.0

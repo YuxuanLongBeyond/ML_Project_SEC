@@ -42,7 +42,7 @@ if RUN_ON_GPU:
 if __name__ == '__main__':
     data_augment = True
     rotate = True
-    change_color = False
+    change_color = True
     early_stop = False
     lr_decay = False
     model_choice = 2 # 0 for linknet, 1 Dlinknet, 2 for D_plusNet
