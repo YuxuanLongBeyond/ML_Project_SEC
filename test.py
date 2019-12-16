@@ -99,7 +99,7 @@ def test_single_with_ensemble(net, file, size = 384, resize = True):
     mask = new_mask * 255
     return mask.astype(np.uint8), test_image_origin
     
-def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth = 1.0, lam = 1.0):
+def test_batch_with_labels(net, file, batch_size = 1, image_size = 384, smooth = 1.0, lam = 1.0):
     # On our validation test dataset
     resize = False
     data_augment = False
@@ -122,8 +122,10 @@ def test_batch_with_labels(net, file, batch_size = 10, image_size = 384, smooth 
         loss = Loss.final_loss(pred, mask)
         epoch_loss += loss.data.item() * batch_size
         
-        numer += utils.var_to_np(mask * (pred > 0.5)).sum()
-        denom += utils.var_to_np(mask).sum() + utils.var_to_np(pred > 0.5).sum()
+        mask = utils.var_to_np(mask)
+        pred = utils.var_to_np(pred)
+        numer += (mask * (pred > 0.5)).sum()
+        denom += mask.sum() + (pred > 0.5).sum()
         
     epoch_loss /= len(test_dataset)
     f1 = 2.0 * numer / denom
@@ -154,7 +156,7 @@ if __name__ == '__main__':
     
     
     if test_with_labels:
-        file = './data/training'
+        file = './data/validate'
         loss, f1 = test_batch_with_labels(net, file, batch_size = 1, image_size = 384, smooth = 1.0, lam = 1.0)    
     
     if only_test_single:
