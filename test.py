@@ -7,24 +7,17 @@ Created on Thu Sep 26 20:10:29 2019
 """
 
 
-import os
 # import argparse
 import random
 import numpy as np
-import time
 
 
 import torch
 import torch.nn as nn
-import cv2
 from skimage import io, transform
 import torch.utils.data as utils_data
 
 import utils
-
-
-RUN_ON_GPU = torch.cuda.is_available()
-#####test####
 
 
 def test_single_image(net, file, size = 384, resize = True):

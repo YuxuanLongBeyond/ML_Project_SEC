@@ -4,6 +4,15 @@
 Created on Sun Oct 13 10:06:57 2019
 
 @author: YuxuanLong
+
+
+This script includes basic functions for:
+    1. Data loader
+    2. Model loader and loss loader
+    3. Data augmentation and transformation
+    4. Converter between Numpy and Torch tensor
+
+
 """
 
 import os
@@ -19,18 +28,30 @@ import torch.utils.data as utils_data
 
 import model
 
-# Run on GPU if CUDA is available.
+
+# Run on GPU if CUDA is available
 RUN_ON_GPU = torch.cuda.is_available()
 
+# Set random seeds
+SEED = 2019
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+if RUN_ON_GPU:
+    torch.cuda.manual_seed(SEED)
+
 def np_to_var(x):
-    """Converts numpy to variable."""
+    '''
+    Converts numpy to Torch variable.
+    '''
     if RUN_ON_GPU:
         x = x.cuda()
     return Variable(x)
 
 
 def var_to_np(x):
-    """Converts variable to numpy."""
+    '''
+    Converts Torch variable to numpy.
+    '''
     if RUN_ON_GPU:
         x = x.cpu()
     return x.data.numpy()

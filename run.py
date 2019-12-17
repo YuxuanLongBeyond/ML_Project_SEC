@@ -31,6 +31,7 @@ This script is for training the neural network.
 # Run on GPU if CUDA is available
 RUN_ON_GPU = torch.cuda.is_available()
 
+# Set random seeds
 SEED = 2019
 random.seed(SEED)
 np.random.seed(SEED)

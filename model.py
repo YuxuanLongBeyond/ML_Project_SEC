@@ -5,14 +5,14 @@ Created on Thu Sep 26 08:23:39 2019
 
 @author: YuxuanLong
 
-The following implements three network models in Pytorch framework:
+The script implements three network models in Pytorch framework:
     1. LinkNet
     2. D-LinkNet
     3. D-LinkNet+
 
 ResNet34 is used as the encoder to all the models.
 
-We denote that:
+Some denotation:
     N--batch size
     H--input image height
     W--input image width
@@ -255,7 +255,7 @@ class Decoder(nn.Module):
     def forward(self, x):
         '''
         Parameters:
-            @x input to the decoder, with size N * C_in * s * s
+            @x: input to the decoder, with size N * C_in * s * s
         return: upsampled features with size N * C_out * (2s) * (2s)
         '''
         x = self.layer1(x)
@@ -268,6 +268,15 @@ class Loss(nn.Module):
     Define the loss
     '''
     def __init__(self, smooth, lam, gamma, loss_type = 'bce'):
+        '''
+        Parameters:
+            @smooth: number to be added on denominator and numerator when compute dice loss
+            @lam: weight to balance the dice loss in the final loss
+            @gamma: for focal loss
+            @loss_type: bce or focal
+            
+        '''
+        
         super(Loss, self).__init__()
 
         self.smooth = smooth
@@ -277,14 +286,20 @@ class Loss(nn.Module):
     
     def bce_loss(self, pred, mask):
         '''
-        Standard BCE by Pytorch function
+        Parameters:
+            @pred: predicted map
+            @mask: ground truth mask
+        return: BCE loss
         '''
         loss = nn.BCELoss()
         return loss(pred, mask)
     
     def focal_loss(self, pred, mask, epsilon = 1e-6):
         '''
-        Focal loss
+        Parameters:
+            @pred: predicted map
+            @mask: ground truth mask      
+        return: focal loss
         '''
         pred = torch.clamp(pred, min = epsilon, max = 1.0 - epsilon)
         loss = - mask * torch.pow(1.0 - pred, self.gamma) * torch.log(pred) - (1.0 - mask) * torch.pow(pred, self.gamma) * torch.log(1.0 - pred)
@@ -293,7 +308,10 @@ class Loss(nn.Module):
         
     def dice_loss(self, pred, mask):
         '''
-        Dice loss
+        Parameters:
+            @pred: predicted map
+            @mask: ground truth mask       
+        return: dice loss
         '''
         # note that numer / denom is just F1 score
         numer = 2.0 * torch.sum(pred * mask, (1, 2, 3))
@@ -306,6 +324,10 @@ class Loss(nn.Module):
         The final loss is either:
             1. BCE + dice loss
             2. focal loss + dice loss
+        Parameters:
+            @pred: predicted map
+            @mask: ground truth mask  
+        return: combined loss
         '''
         loss = self.dice_loss(pred, mask) * self.lam
         if self.loss_type == 'bce':
