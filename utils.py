@@ -12,20 +12,15 @@ This script includes basic functions for:
     3. Data augmentation and transformation
     4. Converter between Numpy and Torch tensor
 
-
 """
 
 import os
 import numpy as np
 import cv2
-
 from skimage import io, transform
 import torch
 from torch.autograd import Variable
-import torchvision.utils
-
 import torch.utils.data as utils_data
-
 import model
 
 
@@ -41,7 +36,7 @@ if RUN_ON_GPU:
 
 def np_to_var(x):
     '''
-    Converts numpy to Torch variable.
+    Convert numpy array to Torch variable.
     '''
     if RUN_ON_GPU:
         x = x.cuda()
@@ -50,25 +45,35 @@ def np_to_var(x):
 
 def var_to_np(x):
     '''
-    Converts Torch variable to numpy.
+    Convert Torch variable to numpy array.
     '''
     if RUN_ON_GPU:
         x = x.cpu()
     return x.data.numpy()
 
 def normalize_both(image, mask):
+    '''
+    Normalize the image and mask into range [0, 1].
+    '''
     image = np.array(image).astype(np.float32) / 255.0
     mask = np.array(mask).astype(np.float32) / 255.0
     return image, mask
     
 def image_resize(image, resize, size):
+    '''
+    Optionally resize the image into (size, size, 3).
+    Then convert it into tensor format (3, size, size).
+    '''
     if resize:
         image = transform.resize(image, (size, size), mode = 'constant', anti_aliasing = True)
     image = np.moveaxis(image, 2, 0).astype(np.float32) # tensor format
     return image
 
 def mask_resize(mask, resize, size):
-    
+    '''
+    Optionally resize the mask into (size, size), transform it to binary mask.
+    Then convert it into tensor format (1, size, size).
+    '''
     if resize:
         mask = transform.resize(mask, (size, size), mode = 'constant', anti_aliasing = True)
     mask = np.array(mask >= 0.5).astype(np.float32) # test here
@@ -76,6 +81,9 @@ def mask_resize(mask, resize, size):
     return mask
 
 def rotate_both(image, mask):
+    '''
+    For a half probability, we rotate the image and mask by both 90 degrees.
+    '''
     if np.random.random() < 0.5:
         image = np.rot90(image, 1, (0, 1))
         mask = np.rot90(mask, 1)
@@ -83,7 +91,14 @@ def rotate_both(image, mask):
 
 
 def random_color(image, delta_h = 10, delta_s = 10, delta_v = 10):
-    
+    '''
+    Add random perturbation on HSV channels of the image.
+
+    Parameters:
+        @delta_h: the range of perturbation on H channel (Hue).
+        @delta_s: the range of perturbation on S channel (Saturation).
+        @delta_v: the range of perturbation on V channel (Value).
+    '''    
     
     image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
     h, s, v = cv2.split(image)
@@ -97,26 +112,33 @@ def random_color(image, delta_h = 10, delta_s = 10, delta_v = 10):
     
     return out
     
-def random_rotate(image, mask, s):
+def random_rotate(image, mask, size):
+    '''
+    Rotate the image and mask by some random angle between 0 and 90 degrees.
+    '''
     L = image.shape[0]
     C = np.array([L - 1, L - 1]) / 2.0
     
-    
     theta = np.random.random() * np.pi / 2.0
 
-    C_hat = np.array([s - 1, s - 1]) / 2.0
+    C_hat = np.array([size - 1, size - 1]) / 2.0
     
     cos = np.cos(theta)
     sin = np.sin(theta)
     
-    R = np.array([[cos, sin],[-sin, cos]])
-    M = np.column_stack((R, C - np.dot(R, C_hat)))
+    R = np.array([[cos, sin],[-sin, cos]]) # rotation matrix
+    M = np.column_stack((R, C - np.dot(R, C_hat))) # affine transformation matrix
     
-    image = cv2.warpAffine(image, M, (s, s), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
-    mask = cv2.warpAffine(mask, M, (s, s), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
+    # inverse mapping with cubic interpolation
+    image = cv2.warpAffine(image, M, (size, size), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
+    mask = cv2.warpAffine(mask, M, (size, size), flags=cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT_101)
     return image, mask
 
 def flip_both(image, mask):
+    '''
+    With probability 0.5, the image and mask are flipped horizontally.
+    With another probability 0.5, the image and mask are flipped vertically.
+    '''
     if np.random.random() < 0.5:
         image = np.fliplr(image)
         mask = np.fliplr(mask)
@@ -127,6 +149,11 @@ def flip_both(image, mask):
 
 
 def flip_rotate(image, flip_v, flip_h, rotate, inverse = False):
+    '''
+    Flip and rotate image based on the flags.
+    The operations can be inversed.
+    This function is used for test time augmentation
+    '''
     if inverse:
         # flip_v, flip_h, rotate
         if flip_v:
@@ -147,7 +174,20 @@ def flip_rotate(image, flip_v, flip_h, rotate, inverse = False):
        
 
 class MyDataset(utils_data.Dataset):
+    '''
+    Task-oriented Torch dataset mainly for training, including data augmentation
+    '''
     def __init__(self, root, resize, data_augment, size, rotate, change_color):
+        '''
+        Parameters:
+            @root: the root directory for the images and masks.
+            @resize: boolean flag for resize.
+            @data augment: boolean flag for random flip and 90-degree rotation (DA8).
+            @size: size of image and mask to be trained or validated.
+            @rotate: boolean flag for random rotation.
+            @change_color: boolean flag for random perturbation on HSV channels.
+        '''
+        
         self.size = size
         self.root = root
         self.rotate = rotate
@@ -156,25 +196,32 @@ class MyDataset(utils_data.Dataset):
         mask_dir = root + '/groundtruth'
         self.resize = resize
         self.mask_file_list = [f for f in os.listdir(mask_dir) if 'sat' in f and 'png' in f]
-#        random.shuffle(self.mask_file_list)
 
     def __getitem__(self, index):
-        file_name =  self.mask_file_list[index].rsplit('.', 1)[0]
+        '''
+        Given an index in file list, we extract the corresponding image and mask.
+        Data augmentation is then applied on image and mask.
+        Finally, a dictionary for image and mask is returned.
+        '''
+        file_name =  self.mask_file_list[index].rsplit('.', 1)[0] # image name without .png
         img_name = self.root + '/images/' + file_name+'.png'
         mask_name = self.root + '/groundtruth/' + file_name+'.png'
         
         image = io.imread(img_name)
         mask = io.imread(mask_name)
         
+        # HSV random perturbation
         if self.change_color:
             image = random_color(image)
         
         image, mask = normalize_both(image, mask)
         
+        # Random rotation
         if self.rotate:
             self.resize = False
             image, mask = random_rotate(image, mask, self.size)
         
+        # DA8
         if self.data_augment:
             image, mask = rotate_both(image, mask)
             image, mask = flip_both(image, mask)
@@ -193,13 +240,26 @@ class MyDataset(utils_data.Dataset):
 
 
 def get_data_loader(root, resize = True, data_augment = True,
-                    image_size = 384, batch_size=100, rotate = False, change_color = False):
-    """Creates training data loader."""
+                    image_size = 384, batch_size=20, rotate = False, change_color = False):
+    '''
+    Get the data loader from my dataset.
+    Parameters:
+        @root: the root directory for the images and masks.
+        @resize: boolean flag for resize.
+        @data augment: boolean flag for random flip and 90-degree rotation (DA8).
+        @image_size: size of image and mask to be trained or validated.
+        @batch_size: batch size during training or validation.
+        @rotate: boolean flag for random rotation.
+        @change_color: boolean flag for random perturbation on HSV channels.    
+    '''
     train_dataset = MyDataset(root, resize, data_augment, image_size, rotate, change_color)
     return utils_data.DataLoader(dataset = train_dataset, batch_size = batch_size, shuffle=True)
 
 
-def create_models(model_choice = 0):
+def create_models(model_choice = 2):
+    '''
+    Choose one model from our implementations
+    '''
     if model_choice == 1:
         net = model.D_LinkNet()
     elif model_choice == 0:
@@ -219,4 +279,12 @@ def create_models(model_choice = 0):
 
 
 def loss(smooth, lam, gamma, loss_type):
+    '''
+    Parameters:
+        @smooth: number to be added on denominator and numerator when compute dice loss.
+        @lam: weight to balance the dice loss in the final combined loss.
+        @gamma: for focal loss.
+        @loss_type: 'bce' or 'focal'.
+    Return: object for combined loss
+    '''
     return model.Loss(smooth, lam, gamma, loss_type)

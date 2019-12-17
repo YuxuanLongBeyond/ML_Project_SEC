@@ -57,9 +57,9 @@ class LinkNet(nn.Module):
     def forward(self, x):
         '''
         Parameters:
-            @x: input image batch with size N * 3 * H * W
+            @x: input image batch with size N * 3 * H * W.
         
-        return: confidence map (batch) with size N * 1 * H * W
+        Return: confidence map (batch) with size N * 1 * H * W.
         '''        
         x0 = self.layer0(x)
         x1 = self.encoder1(x0)
@@ -111,9 +111,9 @@ class D_LinkNet(nn.Module):
     def forward(self, x):
         '''
         Parameters:
-            @x: input image batch with size N * 3 * H * W
+            @x: input image batch with size N * 3 * H * W.
         
-        return: confidence map (batch) with size N * 1 * H * W
+        Return: confidence map (batch) with size N * 1 * H * W.
         '''            
         x0 = self.layer0(x)
         x1 = self.encoder1(x0)
@@ -174,9 +174,9 @@ class D_LinkNetPlus(nn.Module):
     def forward(self, x):
         '''
         Parameters:
-            @x: input image batch with size N * 3 * H * W
+            @x: input image batch with size N * 3 * H * W.
         
-        return: confidence map (batch) with size N * 1 * H * W
+        Return: confidence map (batch) with size N * 1 * H * W.
         '''                
         x0 = self.layer0(x)
         x0_pool = self.maxpool(x0)
@@ -198,13 +198,13 @@ class D_LinkNetPlus(nn.Module):
 
 class Dblock(nn.Module):
     '''
-    Cascading dilated convolutions between encoder and decoder
+    Cascading dilated convolutions between encoder and decoder.
     (central part of D-LinkNet and D-LinkNet)
     '''
     def __init__(self, channel):
         '''
         Parameters:
-            @channel: the number of channels from the output of the encoder
+            @channel: the number of channels from the output of the encoder.
         '''
         super(Dblock, self).__init__()
         dilate1 = [nn.Conv2d(channel, channel, kernel_size = 3, dilation = 1, padding = 1), nn.ReLU()]
@@ -218,9 +218,9 @@ class Dblock(nn.Module):
     def forward(self, x):
         '''
         Parameters:
-            @x: latent features from encoder, with size N * channel * (H / 32) * (W / 32)
+            @x: latent features from encoder, with size N * channel * (H / 32) * (W / 32).
             
-        return: features processed by cascaded dilated convolutions
+        Return: features processed by cascaded dilated convolutions.
         '''
         d1 = self.dilate1(x)
         d2 = self.dilate1(d1)
@@ -232,13 +232,13 @@ class Dblock(nn.Module):
     
 class Decoder(nn.Module):
     '''
-    A decoder block that scale the size of input features by a factor of 2
+    A decoder block that scale the size of input features by a factor of 2.
     '''
     def __init__(self, c_in, c_out):
         '''
         Parameters:
-            @c_in: the number of channels of the input features
-            @c_out: the number of channels of the output features
+            @c_in: the number of channels of the input features.
+            @c_out: the number of channels of the output features.
         '''
         
         
@@ -255,8 +255,8 @@ class Decoder(nn.Module):
     def forward(self, x):
         '''
         Parameters:
-            @x: input to the decoder, with size N * C_in * s * s
-        return: upsampled features with size N * C_out * (2s) * (2s)
+            @x: input to the decoder, with size N * C_in * s * s.
+        Return: upsampled features with size N * C_out * (2s) * (2s).
         '''
         x = self.layer1(x)
         x = self.layer2(x)
@@ -265,15 +265,15 @@ class Decoder(nn.Module):
     
 class Loss(nn.Module):
     '''
-    Define the loss
+    Define the loss.
     '''
     def __init__(self, smooth, lam, gamma, loss_type = 'bce'):
         '''
         Parameters:
-            @smooth: number to be added on denominator and numerator when compute dice loss
-            @lam: weight to balance the dice loss in the final loss
-            @gamma: for focal loss
-            @loss_type: bce or focal
+            @smooth: number to be added on denominator and numerator when compute dice loss.
+            @lam: weight to balance the dice loss in the final combined loss.
+            @gamma: for focal loss.
+            @loss_type: 'bce' or 'focal'.
             
         '''
         
@@ -287,9 +287,9 @@ class Loss(nn.Module):
     def bce_loss(self, pred, mask):
         '''
         Parameters:
-            @pred: predicted map
-            @mask: ground truth mask
-        return: BCE loss
+            @pred: predicted map.
+            @mask: ground truth mask.
+        Return: BCE loss.
         '''
         loss = nn.BCELoss()
         return loss(pred, mask)
@@ -297,9 +297,9 @@ class Loss(nn.Module):
     def focal_loss(self, pred, mask, epsilon = 1e-6):
         '''
         Parameters:
-            @pred: predicted map
-            @mask: ground truth mask      
-        return: focal loss
+            @pred: predicted map.
+            @mask: ground truth mask.
+        Return: focal loss.
         '''
         pred = torch.clamp(pred, min = epsilon, max = 1.0 - epsilon)
         loss = - mask * torch.pow(1.0 - pred, self.gamma) * torch.log(pred) - (1.0 - mask) * torch.pow(pred, self.gamma) * torch.log(1.0 - pred)
@@ -309,9 +309,9 @@ class Loss(nn.Module):
     def dice_loss(self, pred, mask):
         '''
         Parameters:
-            @pred: predicted map
-            @mask: ground truth mask       
-        return: dice loss
+            @pred: predicted map.
+            @mask: ground truth mask.  
+        Return: dice loss.
         '''
         # note that numer / denom is just F1 score
         numer = 2.0 * torch.sum(pred * mask, (1, 2, 3))
@@ -322,12 +322,12 @@ class Loss(nn.Module):
     def final_loss(self, pred, mask):
         '''
         The final loss is either:
-            1. BCE + dice loss
-            2. focal loss + dice loss
+            1. BCE + dice loss.
+            2. focal loss + dice loss.
         Parameters:
-            @pred: predicted map
-            @mask: ground truth mask  
-        return: combined loss
+            @pred: predicted map.
+            @mask: ground truth mask.
+        Return: combined loss.
         '''
         loss = self.dice_loss(pred, mask) * self.lam
         if self.loss_type == 'bce':

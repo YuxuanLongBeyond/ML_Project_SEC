@@ -13,12 +13,10 @@ import random
 import time
 import torch
 import torch.optim as optim
-import cv2
 from skimage import io
 import utils
 import test
 import mask_to_submission
-from torch import autograd
 
 
 """
@@ -179,6 +177,9 @@ def test_net(model_choice, resize, image_size, TTA, test_set_output, test_with_l
         
 
     if test_set_output:    
+        if not os.path.exists('./output'):
+            os.makedirs('./output')    
+        
         
         for i in range(1, num_test + 1):
             t = 'test_' + str(i)
