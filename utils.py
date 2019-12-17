@@ -184,7 +184,7 @@ def create_models(model_choice = 0):
     elif model_choice == 0:
         net = model.LinkNet()
     elif model_choice == 2:
-        net = model.D_plus_LinkNet()
+        net = model.D_LinkNetPlus()
     else:
         net = model.LinkNet()
 

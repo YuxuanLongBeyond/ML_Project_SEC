@@ -21,7 +21,7 @@ from skimage import io, transform
 import torch.utils.data as utils_data
 
 import utils
-import mask_to_submission
+
 
 RUN_ON_GPU = torch.cuda.is_available()
 #####test####
@@ -53,7 +53,7 @@ def test_single_image(net, file, size = 384, resize = True):
     mask = new_mask * 255
     return mask.astype(np.uint8), test_image_origin
 
-def test_single_with_ensemble(net, file, size = 384, resize = True):
+def test_single_with_TTA(net, file, size = 384, resize = True):
     ##create single image tensor for test in each epoch
     uint_image = io.imread(file)
     test_image_origin = np.array(uint_image).astype(np.float32) / 255.0
@@ -99,9 +99,8 @@ def test_single_with_ensemble(net, file, size = 384, resize = True):
     mask = new_mask * 255
     return mask.astype(np.uint8), test_image_origin
     
-def test_batch_with_labels(net, file, batch_size = 1, image_size = 384, smooth = 1.0, lam = 1.0):
+def test_batch_with_labels(net, file, resize = False, batch_size = 10, image_size = 384, smooth = 1.0, lam = 1.0):
     # On our validation test dataset
-    resize = False
     data_augment = False
     rotate = False
     change_color = False
@@ -130,64 +129,3 @@ def test_batch_with_labels(net, file, batch_size = 1, image_size = 384, smooth =
     epoch_loss /= len(test_dataset)
     f1 = 2.0 * numer / denom
     return epoch_loss, f1
-
-
-if __name__ == '__main__':
-    test_image_name = './data/test_set_images/test_26/test_26.png'
-    model_choice = 2
-    ensemble = False
-    
-    only_test_single = True
-    test_set_output = False
-    test_with_labels = False
-    
-    num_test = 50
-
-    net = utils.create_models(model_choice)
-#    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
-    if RUN_ON_GPU:
-        net.load_state_dict(torch.load('./parameters/weights'))
-    else:
-        net.load_state_dict(torch.load('./parameters/weights', map_location = lambda storage, loc: storage))
-    net.eval()
-    
-    resize = False
-    image_size = 384
-    
-    
-    if test_with_labels:
-        file = './data/validate'
-        loss, f1 = test_batch_with_labels(net, file, batch_size = 1, image_size = 384, smooth = 1.0, lam = 1.0)    
-    
-    if only_test_single:
-        if ensemble:
-            mask, image = test_single_with_ensemble(net, test_image_name, size = 384, resize = False)
-        else:
-            mask, image = test_single_image(net, test_image_name, size = 384, resize = False)
-        io.imshow(image)
-        io.imsave('test.png', image)
-        
-
-    if test_set_output:    
-        file = './data/test_set_images/'
-        for i in range(1, num_test + 1):
-            t = 'test_' + str(i)
-            name = file + t + '/' + t + '.png'
-            if ensemble:
-                mask, image = test_single_with_ensemble(net, name, size = 384, resize = False)
-            else:
-                mask, image = test_single_image(net, name, size = 384, resize = False)
-            io.imsave('./output/' + 'test' + str(i) + '.png', mask)
-            
-
-        submission_filename = 'submission.csv'
-            
-        image_filenames = []
-        for i in range(1, num_test + 1):
-            image_filename = 'output/test' + str(i) + '.png'
-            print(image_filename)
-            image_filenames.append(image_filename)
-        mask_to_submission.masks_to_submission(submission_filename, *image_filenames)        
-        
-
-        
