@@ -180,8 +180,8 @@ def train_net(root, resize, data_augment, rotate, change_color, lr,
         file.write('\n'.join(['{}'.format(loss) for loss in loss_history]))
         file.write('\n')
 
-def test_net(model_choice, resize, image_size, TTA, test_set_output, test_with_labels,
-                 only_test_single, test_image_name, test_root, validate_root, num_test = 50):
+def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, test_with_labels,
+                 only_test_single, test_image_name, test_root, validate_root, en_ratio = 0.6, num_test = 50):
     '''
     Model test, which includes three different tests:
         1. If test_set_output = 1, we output the prediction masks of all test images in directory ./output. 
@@ -206,6 +206,9 @@ def test_net(model_choice, resize, image_size, TTA, test_set_output, test_with_l
     
 
     net = utils.create_models(model_choice)
+    DlinkNet = None
+    
+    
 #    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
     if RUN_ON_GPU:
         net.load_state_dict(torch.load('./parameters/weights'))
@@ -213,16 +216,23 @@ def test_net(model_choice, resize, image_size, TTA, test_set_output, test_with_l
         net.load_state_dict(torch.load('./parameters/weights', map_location = lambda storage, loc: storage))
     net.eval()
 
+    if ensemble:
+        DlinkNet = utils.create_models(1)
+        if RUN_ON_GPU:
+            DlinkNet.load_state_dict(torch.load('./parameters/weights_DlinkNet'))
+        else:
+            DlinkNet.load_state_dict(torch.load('./parameters/weights_DlinkNet', map_location = lambda storage, loc: storage))
+        DlinkNet.eval()
     
     if test_with_labels:
-
-        
         loss, f1 = test.test_batch_with_labels(net, validate_root, resize = resize, batch_size = 1, image_size = image_size, smooth = 1.0, lam = 1.0)    
         print('F1 is evaluated as ', f1)
         print('Average batch loss is ', loss)
     
     if only_test_single:
-        if TTA:
+        if ensemble:
+            mask, image = test.test_single_with_ensemble(net, DlinkNet, test_image_name, en_ratio, size = image_size, resize = resize)
+        elif TTA:
             mask, image = test.test_single_with_TTA(net, test_image_name, size = image_size, resize = resize)
         else:
             mask, image = test.test_single_image(net, test_image_name, size = image_size, resize = resize)
@@ -238,7 +248,9 @@ def test_net(model_choice, resize, image_size, TTA, test_set_output, test_with_l
         for i in range(1, num_test + 1):
             t = 'test_' + str(i)
             name = test_root + t + '/' + t + '.png'
-            if TTA:
+            if ensemble:
+                mask, image = test.test_single_with_ensemble(net, DlinkNet, name, en_ratio, size = image_size, resize = resize)
+            elif TTA:
                 mask, image = test.test_single_with_TTA(net, name, size = image_size, resize = resize)
             else:
                 mask, image = test.test_single_image(net, name, size = image_size, resize = resize)
@@ -285,11 +297,12 @@ if __name__ == '__main__':
     
     ## Parameters for testing
     TTA = True
+    ensemble = True
     only_test_single = True
     test_set_output = False
     test_with_labels = False
     test_root = './data/test_set_images/'
-    
+    en_ratio = 0.6
     if train_flag:
         resize = True
         train_net(train_root, resize, data_augment, rotate, change_color, lr, 
@@ -299,6 +312,6 @@ if __name__ == '__main__':
 
     if test_flag:
         resize = False
-        test_net(model_choice, resize, image_size, TTA, test_set_output, test_with_labels,
-                 only_test_single, test_image_name, test_root, validate_root)
+        test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, test_with_labels,
+                 only_test_single, test_image_name, test_root, validate_root, en_ratio)
 
