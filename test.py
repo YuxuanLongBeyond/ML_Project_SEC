@@ -169,14 +169,14 @@ def test_batch_with_labels(net, file, resize = False, batch_size = 10, image_siz
     return epoch_loss, f1
 
 
-def test_single_with_ensemble(Dlink, Dlink_plus, file, ratio = 0.6, size = 384, resize = True):
+def test_single_with_ensemble(link, Dlink, Dlink_plus, file, size = 384, resize = True):
     '''
     Test a single image with the trained model, using ensemble and test time augmentation (TTA).
     Parameters:
+        @link: the object for LinkNet.
         @Dlink: the object for D-LinkNet.
         @Dlink_plus: the object for D-LinkNet+.
         @file: name of the image file for test.
-        @ratio: ratio for ensemble.
         @size: the size that the image is converted to.
         @resize: boolean flag for image resize.
     Return: 
@@ -211,14 +211,15 @@ def test_single_with_ensemble(Dlink, Dlink_plus, file, ratio = 0.6, size = 384, 
     # convert to Torch tensor variable
     image_tensor = utils.np_to_var(torch.from_numpy(image_tensor))  
     
+    pred_test0 = link.forward(image_tensor)
     pred_test1 = Dlink.forward(image_tensor)
     pred_test2 = Dlink_plus.forward(image_tensor)
     
-    
+    pred_np0 = utils.var_to_np(pred_test0)
     pred_np1 = utils.var_to_np(pred_test1)
     pred_np2 = utils.var_to_np(pred_test2)
     
-    
+    pred0 = np.squeeze(pred_np0, axis = 1)
     pred1 = np.squeeze(pred_np1, axis = 1)
     pred2 = np.squeeze(pred_np2, axis = 1)
     
@@ -227,10 +228,11 @@ def test_single_with_ensemble(Dlink, Dlink_plus, file, ratio = 0.6, size = 384, 
         b1 = i // 4
         b2 = (i - b1 * 4) // 2
         b3 = i - b1 * 4 - b2 * 2
+        pred0[i] = utils.flip_rotate(pred0[i], b1, b2, b3, inverse = True)
         pred1[i] = utils.flip_rotate(pred1[i], b1, b2, b3, inverse = True)
         pred2[i] = utils.flip_rotate(pred2[i], b1, b2, b3, inverse = True)
         
-    pred = np.mean(pred1 * (1 - ratio) + pred2 * ratio, axis = 0)
+    pred = np.mean(pred0 * 0.25 + pred1 * 0.35 + pred2 * 0.4, axis = 0)
 
     # convert prediction to binary segmentation mask
     new_mask = (pred >= 0.5)

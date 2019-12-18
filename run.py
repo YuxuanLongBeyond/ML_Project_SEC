@@ -181,7 +181,7 @@ def train_net(root, resize, data_augment, rotate, change_color, lr,
         file.write('\n')
 
 def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, test_with_labels,
-                 only_test_single, test_image_name, test_root, validate_root, en_ratio = 0.6, num_test = 50):
+                 only_test_single, test_image_name, test_root, validate_root, num_test = 50):
     '''
     Model test, which includes three different tests:
         1. If test_set_output = 1, we output the prediction masks of all test images in directory ./output. 
@@ -202,7 +202,6 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
     @test_image_name: the name of the image to be tested.
     @test_root: root directory for test dataset.
     @validate_root: root directory for validation dataset.
-    @en_ratio: ratio for ensemble.
     @num_test: number of test images in the test dataset.
     '''
     
@@ -219,12 +218,20 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
     net.eval()
 
     if ensemble:
+        linkNet = utils.create_models(0)
         DlinkNet = utils.create_models(1)
+        DlinkNet_plus = utils.create_models(2)
         if RUN_ON_GPU:
+            linkNet.load_state_dict(torch.load('./parameters/weights0'))
             DlinkNet.load_state_dict(torch.load('./parameters/weights1'))
+            DlinkNet_plus.load_state_dict(torch.load('./parameters/weights2'))
         else:
+            linkNet.load_state_dict(torch.load('./parameters/weights0', map_location = lambda storage, loc: storage))
             DlinkNet.load_state_dict(torch.load('./parameters/weights1', map_location = lambda storage, loc: storage))
+            DlinkNet_plus.load_state_dict(torch.load('./parameters/weights2', map_location = lambda storage, loc: storage))
+        linkNet.eval()
         DlinkNet.eval()
+        DlinkNet_plus.eval()
     
     if test_with_labels:
         loss, f1 = test.test_batch_with_labels(net, validate_root, resize = resize, batch_size = 1, image_size = image_size, smooth = 1.0, lam = 1.0)    
@@ -233,7 +240,7 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
     
     if only_test_single:
         if ensemble:
-            mask, image = test.test_single_with_ensemble(DlinkNet, net, test_image_name, en_ratio, size = image_size, resize = resize)
+            mask, image = test.test_single_with_ensemble(linkNet, DlinkNet, DlinkNet_plus, test_image_name, size = image_size, resize = resize)
         elif TTA:
             mask, image = test.test_single_with_TTA(net, test_image_name, size = image_size, resize = resize)
         else:
@@ -251,7 +258,7 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
             t = 'test_' + str(i)
             name = test_root + t + '/' + t + '.png'
             if ensemble:
-                mask, image = test.test_single_with_ensemble(DlinkNet, net, name, en_ratio, size = image_size, resize = resize)
+                mask, image = test.test_single_with_ensemble(linkNet, DlinkNet, DlinkNet_plus, name, size = image_size, resize = resize)
             elif TTA:
                 mask, image = test.test_single_with_TTA(net, name, size = image_size, resize = resize)
             else:
@@ -304,7 +311,6 @@ if __name__ == '__main__':
     test_set_output = False
     test_with_labels = False
     test_root = './data/test_set_images/'
-    en_ratio = 0.6
     if train_flag:
         resize = True
         train_net(train_root, resize, data_augment, rotate, change_color, lr, 
@@ -315,5 +321,5 @@ if __name__ == '__main__':
     if test_flag:
         resize = False
         test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, test_with_labels,
-                 only_test_single, test_image_name, test_root, validate_root, en_ratio)
+                 only_test_single, test_image_name, test_root, validate_root)
 
