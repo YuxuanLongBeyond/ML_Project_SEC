@@ -245,7 +245,7 @@ def get_data_loader(root, resize = True, data_augment = True,
     Get the data loader from my dataset.
     Parameters:
         @root: the root directory for the images and masks.
-        @resize: boolean flag for resize.
+        @resize: boolean flag for image resize.
         @data augment: boolean flag for random flip and 90-degree rotation (DA8).
         @image_size: size of image and mask to be trained or validated.
         @batch_size: batch size during training or validation.

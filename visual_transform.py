@@ -11,8 +11,7 @@ from skimage import io, transform
 from utils import random_color
 
 ####### Visualizing the geometric and color transformation
-### Mainly for test
-
+### mainly for debug test of data augmentation
     
 if __name__ == '__main__':
     A = io.imread('./data/training/images/satImage_001.png')
