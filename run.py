@@ -195,12 +195,14 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
     @resize: boolean flag for image resizing.    
     @image_size: the image size for the images to trained.
     @TTA: boolean flag for test time augmentation. 
+    @ensemble: boolean flag to enable ensemble when testing
     @test_set_output: boolean flag for testing all the images in the test dataset.
     @test_with_labels: boolean flag for testing on a validation dataset, with labels provided.
     @only_test_single: boolean flag for testing a single image.
     @test_image_name: the name of the image to be tested.
     @test_root: root directory for test dataset.
     @validate_root: root directory for validation dataset.
+    @en_ratio: ratio for ensemble.
     @num_test: number of test images in the test dataset.
     '''
     
@@ -231,7 +233,7 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
     
     if only_test_single:
         if ensemble:
-            mask, image = test.test_single_with_ensemble(net, DlinkNet, test_image_name, en_ratio, size = image_size, resize = resize)
+            mask, image = test.test_single_with_ensemble(DlinkNet, net, test_image_name, en_ratio, size = image_size, resize = resize)
         elif TTA:
             mask, image = test.test_single_with_TTA(net, test_image_name, size = image_size, resize = resize)
         else:
@@ -249,7 +251,7 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
             t = 'test_' + str(i)
             name = test_root + t + '/' + t + '.png'
             if ensemble:
-                mask, image = test.test_single_with_ensemble(net, DlinkNet, name, en_ratio, size = image_size, resize = resize)
+                mask, image = test.test_single_with_ensemble(DlinkNet, net, name, en_ratio, size = image_size, resize = resize)
             elif TTA:
                 mask, image = test.test_single_with_TTA(net, name, size = image_size, resize = resize)
             else:
