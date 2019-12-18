@@ -80,7 +80,7 @@ def train_net(root, resize, data_augment, rotate, change_color, lr,
     
     if not os.path.exists('./parameters'):
         os.makedirs('./parameters')    
-    
+    weights_name = './parameters/weights' + str(model_choice)
     
     net = utils.create_models(model_choice)
     net.train() # in train mode
@@ -146,7 +146,7 @@ def train_net(root, resize, data_augment, rotate, change_color, lr,
                 if loss <= test_loss:
                     test_loss = loss
                     count = 0
-                    torch.save(net.state_dict(), './parameters/weights')
+                    torch.save(net.state_dict(), weights_name)
                 elif count < early_stop_tol:
                     count += 1
                     lr *= decay_rate
@@ -160,7 +160,7 @@ def train_net(root, resize, data_augment, rotate, change_color, lr,
         
         if not early_stop and (epoch + 1) % save_ckpt == 0:
             with torch.no_grad():
-                torch.save(net.state_dict(), './parameters/weights')
+                torch.save(net.state_dict(), weights_name)
               
         if lr_decay and (epoch + 1) % decay_period == 0: 
             with torch.no_grad():
@@ -173,7 +173,7 @@ def train_net(root, resize, data_augment, rotate, change_color, lr,
         print('In the epoch ', epoch, ', the average batch loss is ', epoch_loss)
         
     if not early_stop:
-        torch.save(net.state_dict(), './parameters/weights')
+        torch.save(net.state_dict(), weights_name)
         
     # save the loss history
     with open('loss.txt', 'wt') as file:
@@ -208,20 +208,20 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
     net = utils.create_models(model_choice)
     DlinkNet = None
     
-    
+    weights_name = './parameters/weights' + str(model_choice)
 #    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
     if RUN_ON_GPU:
-        net.load_state_dict(torch.load('./parameters/weights'))
+        net.load_state_dict(torch.load(weights_name))
     else:
-        net.load_state_dict(torch.load('./parameters/weights', map_location = lambda storage, loc: storage))
+        net.load_state_dict(torch.load(weights_name, map_location = lambda storage, loc: storage))
     net.eval()
 
     if ensemble:
         DlinkNet = utils.create_models(1)
         if RUN_ON_GPU:
-            DlinkNet.load_state_dict(torch.load('./parameters/weights_DlinkNet'))
+            DlinkNet.load_state_dict(torch.load('./parameters/weights1'))
         else:
-            DlinkNet.load_state_dict(torch.load('./parameters/weights_DlinkNet', map_location = lambda storage, loc: storage))
+            DlinkNet.load_state_dict(torch.load('./parameters/weights1', map_location = lambda storage, loc: storage))
         DlinkNet.eval()
     
     if test_with_labels:
