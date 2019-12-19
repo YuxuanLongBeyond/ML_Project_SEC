@@ -279,34 +279,34 @@ if __name__ == '__main__':
     ## Shared parameters for both training and testing
     model_choice = 2 # 0 for linknet, 1 Dlinknet, 2 for D_LinkNetPlus
     test_image_name = './data/test_set_images/test_26/test_26.png'
-    image_size = 384
+    image_size = 384 # the image size which the images are trained
     validate_root = './data/validate'
     
     
-    ## Parameters for network training
+    ## Parameters for network training (details are shown under the function train_net)
     batch_size = 20
     num_epochs = 1500    
-    data_augment = True
-    rotate = True
-    change_color = False
-    lr = 1e-4
-    weight_decay = 1e-5
-    early_stop = False
-    early_stop_tol = 8
-    lr_decay = False
-    decay_rate = 0.6
-    decay_period = 500
-    save_test_image = 10
-    save_ckpt = 20
+    data_augment = True # flag for DA8
+    rotate = True # flag for random rotation
+    change_color = False # flag for HSV color random perturbation
+    lr = 1e-4 # learning rate
+    weight_decay = 1e-5 
+    early_stop = False # flag for early stop
+    early_stop_tol = 8 # tolerence for early stop
+    lr_decay = False # flag for learning rate decay
+    decay_rate = 0.6 # ratio for learning rate decay
+    decay_period = 500 # period for the learning rate to decay
+    save_test_image = 10 # period to save the test image during training
+    save_ckpt = 20 # period for saving the checkpoint
     train_root = './data/training'
     
     
-    ## Parameters for testing
-    TTA = True
-    ensemble = False
-    only_test_single = False
-    test_set_output = True
-    test_with_labels = False
+    ## Parameters for testing (details are shown under the function test_net)
+    TTA = True # flag for test time augmentation
+    ensemble = False # flag for ensemble
+    only_test_single = False # flag for testing only one single image
+    test_set_output = True # flag for testing all images in the test dataset
+    test_with_labels = False # flag for testing data with labels
     test_root = './data/test_set_images/'
     if train_flag:
         resize = True
