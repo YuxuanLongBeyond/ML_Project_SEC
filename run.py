@@ -14,7 +14,6 @@ This script contains the training and test for our model.
 import os
 import shutil
 import numpy as np
-import random
 import time
 import torch
 import torch.optim as optim
@@ -30,7 +29,6 @@ RUN_ON_GPU = torch.cuda.is_available()
 
 # Set random seeds
 SEED = 2019
-random.seed(SEED)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
 if RUN_ON_GPU:
