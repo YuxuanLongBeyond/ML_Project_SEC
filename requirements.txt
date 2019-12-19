@@ -1,10 +1,10 @@
 scikit_image==0.14.0
-cryptography==2.7
 numpy==1.14.6
+lxml==4.2.1
+cryptography==2.7
+Cython==0.28.2
 torch==0.4.1
 matplotlib==2.2.2
-Cython==0.28.2
-lxml==4.2.1
 pyOpenSSL==19.1.0
 protobuf==3.11.1
 ipaddr==2.2.0
