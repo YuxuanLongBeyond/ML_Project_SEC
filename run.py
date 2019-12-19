@@ -207,6 +207,7 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
     
 
     net = utils.create_models(model_choice)
+    linkNet = None
     DlinkNet = None
     
     weights_name = './parameters/weights' + str(model_choice)
@@ -220,18 +221,14 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
     if ensemble:
         linkNet = utils.create_models(0)
         DlinkNet = utils.create_models(1)
-        DlinkNet_plus = utils.create_models(2)
         if RUN_ON_GPU:
             linkNet.load_state_dict(torch.load('./parameters/weights0'))
             DlinkNet.load_state_dict(torch.load('./parameters/weights1'))
-            DlinkNet_plus.load_state_dict(torch.load('./parameters/weights2'))
         else:
             linkNet.load_state_dict(torch.load('./parameters/weights0', map_location = lambda storage, loc: storage))
             DlinkNet.load_state_dict(torch.load('./parameters/weights1', map_location = lambda storage, loc: storage))
-            DlinkNet_plus.load_state_dict(torch.load('./parameters/weights2', map_location = lambda storage, loc: storage))
         linkNet.eval()
         DlinkNet.eval()
-        DlinkNet_plus.eval()
     
     if test_with_labels:
         loss, f1 = test.test_batch_with_labels(net, validate_root, resize = resize, batch_size = 1, image_size = image_size, smooth = 1.0, lam = 1.0)    
@@ -240,7 +237,7 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
     
     if only_test_single:
         if ensemble:
-            mask, image = test.test_single_with_ensemble(linkNet, DlinkNet, DlinkNet_plus, test_image_name, size = image_size, resize = resize)
+            mask, image = test.test_single_with_ensemble(linkNet, DlinkNet, net, test_image_name, size = image_size, resize = resize)
         elif TTA:
             mask, image = test.test_single_with_TTA(net, test_image_name, size = image_size, resize = resize)
         else:
@@ -258,7 +255,7 @@ def test_net(model_choice, resize, image_size, TTA, ensemble, test_set_output, t
             t = 'test_' + str(i)
             name = test_root + t + '/' + t + '.png'
             if ensemble:
-                mask, image = test.test_single_with_ensemble(linkNet, DlinkNet, DlinkNet_plus, name, size = image_size, resize = resize)
+                mask, image = test.test_single_with_ensemble(linkNet, DlinkNet, net, name, size = image_size, resize = resize)
             elif TTA:
                 mask, image = test.test_single_with_TTA(net, name, size = image_size, resize = resize)
             else:
