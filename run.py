@@ -284,11 +284,11 @@ if __name__ == '__main__':
     ## Parameters for network training (details are shown under the function train_net)
     batch_size = 20
     num_epochs = 1500    
-    data_augment = True # flag for DA8
-    rotate = True # flag for random rotation
-    change_color = False # flag for HSV color random perturbation
     lr = 1e-4 # learning rate
-    weight_decay = 1e-5 
+    weight_decay = 1e-5     
+    data_augment = True # flag for DA8 (data augmentation)
+    rotate = True # flag for random rotation (data augmentation)
+    change_color = True # flag for HSV color random perturbation (data augmentation)
     early_stop = False # flag for early stop
     early_stop_tol = 8 # tolerence for early stop
     lr_decay = False # flag for learning rate decay
@@ -304,8 +304,10 @@ if __name__ == '__main__':
     ensemble = False # flag for ensemble
     only_test_single = False # flag for testing only one single image
     test_set_output = True # flag for testing all images in the test dataset
-    test_with_labels = False # flag for testing data with labels
+    test_with_labels = False # flag for testing data with labels (if provided)
     test_root = './data/test_set_images/'
+    
+    
     if train_flag:
         resize = True
         train_net(train_root, resize, data_augment, rotate, change_color, lr, 
