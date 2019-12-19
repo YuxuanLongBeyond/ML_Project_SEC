@@ -42,3 +42,4 @@ To reproduce the trained weights, here we introduce several parameters in 'run.p
 `test_flag`: the boolean flag to enable test, by default it is set to True.  
 `model_choice`: if `model_choice = 2` (by default), D-LinkNet+ is chosen; if `model_choice = 1`, D-LinkNet is chosen; if `model_choice = 0`, LinkNet is chosen.  
 To reproduce the weights trained on D-LinkNet+ (we use them to make final submission), please **only** change `train_flag` and set it as `train_flag = True`. To reproduce other weights, please modify the value of `model_choice`. It is not necessary to change any other training parameters, since they are already to default values.  
+After training, the weights will be saved in folder 'parameters'. Please be **careful** that the weights can be overwritten.
