@@ -2,7 +2,7 @@
 
 To make sure that the software requirements are satisfied, under the top directory in the project, please run:  
 `pip install -r requirements.txt`  
-Please also make sure to run the scripts in Python3.  
+Please also make sure to run the scripts in Python3. It is suggested to run in GPU environment, nevertheless running in CPU environment is also allowed.  
 
 ## A Quick Start
 To test our model, please first download the trained weights in:  
@@ -31,7 +31,7 @@ ML_Project_SEC
     │   ...
 ```
 
-Finally, as the parameters in 'run.py' are set by default to enable test, please directly run 'run.py' to reproduce the official submission file (the final project submission), where the F1 score should be 0.921. 'submission.csv' will be produced, and a new folder 'output' will be created to store the predictions (i.e. binary masks).  
+Finally, as the parameters in 'run.py' are already set by default to enable test, please **directly run** 'run.py' to reproduce the official submission file (the final project submission), where the F1 score should be 0.921. 'submission.csv' will be produced, and a new folder 'output' will be created to store the predictions (i.e. binary masks).  
 The best result can be reproduced by downloading the best weights (only for D-LinkNet+) from:  
 https://drive.google.com/drive/folders/1PvoWi6j6ZpECoewhw__p8qnkNGVGs5hf?usp=sharing  
 Note this best weights are not reproducible from training, since its random seeds are unknown unfortunately. To test it, please replace this weights in folder 'parameters', and run 'run.py' again, so that F1 score of 0.922 can be reached.  
@@ -41,4 +41,4 @@ To reproduce the trained weights, here we introduce several parameters in 'run.p
 `train_flag`: the boolean flag to enable training, by default it is set to False.  
 `test_flag`: the boolean flag to enable test, by default it is set to True.  
 `model_choice`: if `model_choice = 2` (by default), D-LinkNet+ is chosen; if `model_choice = 1`, D-LinkNet is chosen; if `model_choice = 0`, LinkNet is chosen.  
-To reproduce the weights trained on D-LinkNet+ (we use them to make final submission), please only change `train_flag` and set it as `train_flag = True`. To reproduce other weights, please modify the value of `model_choice`. It is not necessary to change any other training parameters, since they are already to default values.  
+To reproduce the weights trained on D-LinkNet+ (we use them to make final submission), please **only** change `train_flag` and set it as `train_flag = True`. To reproduce other weights, please modify the value of `model_choice`. It is not necessary to change any other training parameters, since they are already to default values.  
