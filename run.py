@@ -303,9 +303,9 @@ if __name__ == '__main__':
     
     ## Parameters for testing
     TTA = True
-    ensemble = True
-    only_test_single = True
-    test_set_output = False
+    ensemble = False
+    only_test_single = False
+    test_set_output = True
     test_with_labels = False
     test_root = './data/test_set_images/'
     if train_flag:
