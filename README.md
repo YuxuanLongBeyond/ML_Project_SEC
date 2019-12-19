@@ -27,8 +27,9 @@ ML_Project_SEC
 │   └───test_set_images
 │       │   ...
 │       
-└───parameters            // stored trained weights
-    │   ...
+└───parameters            // store trained weights
+    │   weights2
+    │   ...    
 ```
 
 Finally, as the parameters in 'run.py' are already set by default to enable test, please **directly run** 'run.py' to reproduce the official submission file (the final project submission), where the F1 score should be 0.921. 'submission.csv' will be produced, and a new folder 'output' will be created to store the predictions (i.e. binary masks).  
