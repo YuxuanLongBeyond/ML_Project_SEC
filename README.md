@@ -10,7 +10,7 @@ https://drive.google.com/drive/folders/1uqSavfAJ8LMrAo178em-3EKrhEFNCfH1?usp=sha
 There are three weights in this drive: 'weights0' for LinkNet, 'weights1' for D-LinkNet, 'weights2' for D-LinkNet+. Note that these weights are all reproducible.  
 For convenience, please only download 'weights2' and put it into folder 'parameters'. Downloading all the weights and putting them into folder 'parameters' can enable test in ensemble mode (not recommended).  
 The second step is to put the training and test data into folder 'data', i.e. data/training and data/test_set_images.  
-The directory structure should now become:  
+The directory structure should now look like:  
 ```
 ML_Project_SEC
 │   ...                   // Python scripts
