@@ -1,5 +1,5 @@
 scikit_image==0.14.0
-numpy==1.14.6
+numpy==1.22.0
 lxml==4.6.2
 cryptography==3.3.2
 Cython==0.28.2
