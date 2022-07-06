@@ -1,6 +1,6 @@
 scikit_image==0.14.0
 numpy==1.14.6
-lxml==4.6.2
+lxml==4.9.1
 cryptography==3.3.2
 Cython==0.28.2
 torch==0.4.1
